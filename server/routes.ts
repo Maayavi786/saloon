@@ -2,7 +2,16 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertBookingSchema, insertReviewSchema } from "@shared/schema";
+import { insertBookingSchema, insertReviewSchema, insertPaymentTransactionSchema } from "@shared/schema";
+import Stripe from "stripe";
+
+// Validate Stripe secret key exists
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+
+// Initialize Stripe with the latest API version
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication routes
@@ -245,6 +254,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(allBookings);
     } catch (error) {
       res.status(500).json({ message: "حدث خطأ أثناء استرجاع الحجوزات" });
+    }
+  });
+
+  // Payment API - Stripe integration with Mada support
+  app.post("/api/payment/create-intent", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "يجب تسجيل الدخول" });
+    }
+    
+    try {
+      const { amount, serviceId, bookingDetails } = req.body;
+      
+      if (!amount || amount <= 0) {
+        return res.status(400).json({ message: "المبلغ غير صحيح" });
+      }
+      
+      // Create payment intent with Mada as a payment method
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to smallest currency unit (halalas)
+        currency: "sar", // Saudi Riyal
+        payment_method_types: ["card", "mada"], // Enable both standard cards and Mada cards
+        metadata: {
+          userId: req.user.id.toString(),
+          serviceId: serviceId?.toString() || null,
+          bookingDetails: JSON.stringify(bookingDetails || {})
+        }
+      });
+      
+      res.json({
+        clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
+        message: "تم إنشاء عملية الدفع بنجاح"
+      });
+    } catch (error: any) {
+      console.error("Stripe error:", error.message);
+      res.status(500).json({ 
+        message: "حدث خطأ أثناء إنشاء عملية الدفع",
+        error: error.message 
+      });
+    }
+  });
+  
+  app.post("/api/payment/confirm-booking", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "يجب تسجيل الدخول" });
+    }
+    
+    try {
+      const { paymentIntentId, serviceId, bookingDetails } = req.body;
+      
+      if (!paymentIntentId) {
+        return res.status(400).json({ message: "معرف عملية الدفع مطلوب" });
+      }
+      
+      // Retrieve payment intent to verify status
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+      
+      if (paymentIntent.status !== 'succeeded') {
+        return res.status(400).json({ 
+          message: "لم يتم إكمال عملية الدفع بنجاح", 
+          paymentStatus: paymentIntent.status 
+        });
+      }
+      
+      // Create booking record
+      const userId = req.user.id;
+      const booking = await storage.createBooking({
+        ...bookingDetails,
+        userId,
+        serviceId: parseInt(serviceId),
+        status: "confirmed",
+        paymentStatus: "paid",
+        createdAt: new Date()
+      });
+      
+      // Record payment transaction
+      const paymentTransaction = await storage.createPaymentTransaction({
+        userId,
+        bookingId: booking.id,
+        amount: paymentIntent.amount / 100,
+        currency: paymentIntent.currency || "sar",
+        paymentMethod: "card",
+        status: "completed",
+        paymentGateway: "stripe",
+        gatewayTransactionId: paymentIntentId,
+        // Skip card details since we don't have access to them in this context
+        cardLast4: null,
+        createdAt: new Date()
+      });
+      
+      // Add loyalty points for successful booking
+      await storage.updateUserLoyaltyPoints(userId, 10);
+      
+      res.status(201).json({ 
+        booking, 
+        paymentTransaction,
+        message: "تم تأكيد الحجز والدفع بنجاح"
+      });
+    } catch (error: any) {
+      console.error("Payment confirmation error:", error.message);
+      res.status(500).json({ 
+        message: "حدث خطأ أثناء تأكيد الحجز",
+        error: error.message 
+      });
     }
   });
 
