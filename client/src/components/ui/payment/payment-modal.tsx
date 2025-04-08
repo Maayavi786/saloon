@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { MadaPaymentForm } from './mada-payment-form';
+import { PaymentForm } from './payment-form';
 import { Service, User } from '@shared/schema';
 import { useLanguage } from '@/hooks/use-language';
 import { useAuth } from '@/hooks/use-auth';
@@ -30,7 +30,7 @@ export function PaymentModal({
 }: PaymentModalProps) {
   const { language } = useLanguage();
   const { user } = useAuth();
-  const [paymentMethod, setPaymentMethod] = useState<'mada' | 'cash'>('mada');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'cash'>('card');
 
   // Prepare booking details with user info if available
   const fullBookingDetails = {
@@ -65,7 +65,7 @@ export function PaymentModal({
         </DialogHeader>
 
         <div className="py-4">
-          <MadaPaymentForm
+          <PaymentForm
             amount={service.price}
             serviceId={service.id}
             bookingDetails={fullBookingDetails}

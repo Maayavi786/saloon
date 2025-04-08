@@ -480,11 +480,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "المبلغ غير صحيح" });
       }
       
-      // Create payment intent with Mada as a payment method
+      // Create payment intent with standard payment method types
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to smallest currency unit (halalas)
         currency: "sar", // Saudi Riyal
-        payment_method_types: ["card", "mada"], // Enable both standard cards and Mada cards
+        payment_method_types: ["card"], // Standard card payments
         metadata: {
           userId: req.user.id.toString(),
           serviceId: serviceId?.toString() || null,
