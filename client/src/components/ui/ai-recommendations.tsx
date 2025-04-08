@@ -46,12 +46,18 @@ export function AIRecommendations({ salonId, limit = 3, showReasons = true }: AI
       try {
         // Determine endpoint based on whether we have a salonId
         const endpoint = salonId 
-          ? `/api/salons/${salonId}/services/featured` 
-          : `/api/services/featured`;
+          ? `/api/salons/${salonId}/featured-services` 
+          : `/api/admin/debug-services?limit=10`;
           
         const res = await apiRequest("GET", endpoint);
         if (res.ok) {
-          const services = await res.json();
+          let services = await res.json();
+          
+          // Handle different response formats
+          if (services.services && Array.isArray(services.services)) {
+            services = services.services; // For debug endpoint
+          }
+          
           setFallbackServices(services || []);
         }
       } catch (error) {
