@@ -678,7 +678,18 @@ export class MemStorage implements IStorage {
       }
     }
     
+    console.log(`Returning ${services.length} services for salon ${salonId}`);
     return services;
+  }
+  
+  // Debug method
+  async debugServices(salonId?: number): Promise<Service[]> {
+    if (salonId) {
+      return Array.from(this.services.values()).filter(
+        service => service.salonId === salonId
+      );
+    }
+    return Array.from(this.services.values());
   }
   
   async getServiceById(id: number): Promise<Service | undefined> {

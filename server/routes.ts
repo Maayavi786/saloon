@@ -131,6 +131,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // Debug endpoint to check all services
+  app.get("/api/admin/debug-services", async (req, res) => {
+    try {
+      const allServices = await storage.debugServices();
+      const salonId = req.query.salonId ? parseInt(req.query.salonId as string) : undefined;
+      
+      const result = {
+        totalServices: allServices.length,
+        servicesBySalon: {} as Record<number, number>,
+        services: salonId ? allServices.filter(s => s.salonId === salonId) : allServices
+      };
+      
+      // Count services by salon
+      allServices.forEach(service => {
+        if (!result.servicesBySalon[service.salonId]) {
+          result.servicesBySalon[service.salonId] = 0;
+        }
+        result.servicesBySalon[service.salonId]++;
+      });
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error debugging services:", error.message);
+      res.status(500).json({ 
+        message: "حدث خطأ أثناء جلب بيانات الخدمات للتصحيح",
+        error: error.message 
+      });
+    }
+  });
 
   // Bookings API
   app.get("/api/bookings/my", async (req, res) => {

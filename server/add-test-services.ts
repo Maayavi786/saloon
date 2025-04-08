@@ -1,6 +1,7 @@
 import { storage } from "./storage";
 
 export async function addTestServices() {
+  console.log("Before adding services, services for Salon 4:", await storage.debugServices(4));
   // Add services for Salon ID 2 (Elegance Spa)
   await storage.createService({
     name: "سبا للقدمين",
@@ -164,4 +165,6 @@ export async function addTestServices() {
     image: "https://img.freepik.com/free-photo/woman-relaxing-spa_144627-16223.jpg",
     featured: false
   });
+  
+  console.log("After adding services, services for Salon 4:", await storage.debugServices(4));
 }
