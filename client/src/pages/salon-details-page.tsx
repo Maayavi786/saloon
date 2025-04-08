@@ -1,29 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/hooks/use-language";
+import { useAuth } from "@/hooks/use-auth";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Header } from "@/components/layout/header";
 import { BottomNavigation } from "@/components/layout/bottom-navigation";
 import { ServiceCard } from "@/components/ui/service-card";
+import { StaffCard } from "@/components/ui/staff-card";
 import { CategoryItem } from "@/components/ui/category-item";
-import { Salon, Service, Review } from "@shared/schema";
+import { Salon, Service, Review, Staff } from "@shared/schema";
 import { BookingModal } from "@/components/ui/booking-modal";
 import { useBooking } from "@/contexts/booking-context";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { 
   Clock, MapPin, Phone, ChevronRight, 
-  Star, CheckCircle, Calendar
+  Star, CheckCircle, Calendar, Users
 } from "lucide-react";
 
 export default function SalonDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const [, navigate] = useLocation();
   const { language } = useLanguage();
-  const { selectedService, isBookingModalOpen, closeBookingModal } = useBooking();
+  const { isBookingModalOpen, closeBookingModal, openBookingModal } = useBooking();
   const isArabic = language === "ar";
+  const { user } = useAuth();
+  const { toast } = useToast();
   
   const [activeCategory, setActiveCategory] = useState("all");
+  const [selectedServiceForModal, setSelectedServiceForModal] = useState<Service | null>(null);
   
   // Fetch salon details
   const { data: salon, isLoading: isLoadingSalon } = useQuery<Salon>({
@@ -45,6 +51,12 @@ export default function SalonDetailsPage() {
   // Fetch reviews
   const { data: reviews, isLoading: isLoadingReviews } = useQuery<Review[]>({
     queryKey: [`/api/salons/${id}/reviews`],
+    enabled: !!id,
+  });
+  
+  // Fetch staff
+  const { data: staff, isLoading: isLoadingStaff } = useQuery<Staff[]>({
+    queryKey: [`/api/salons/${id}/staff`],
     enabled: !!id,
   });
   
@@ -225,6 +237,37 @@ export default function SalonDetailsPage() {
             )}
           </div>
           
+          {/* Staff Section */}
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="font-bold">{isArabic ? "طاقم العمل" : "Our Staff"}</h2>
+              <div className="flex items-center">
+                <Users className="h-4 w-4 text-primary" />
+                <span className={`${isArabic ? "mr-1" : "ml-1"} text-neutral-700`}>
+                  {staff?.length || 0}
+                </span>
+              </div>
+            </div>
+            
+            {isLoadingStaff ? (
+              <div>
+                {[1, 2].map(i => (
+                  <div key={i} className="bg-white rounded-xl h-24 mb-3 animate-pulse"></div>
+                ))}
+              </div>
+            ) : staff && staff.length > 0 ? (
+              <div>
+                {staff.map(member => (
+                  <StaffCard key={member.id} staff={member} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-neutral-500 text-center py-4">
+                {isArabic ? "لا يوجد معلومات عن الطاقم حالياً" : "No staff information available"}
+              </p>
+            )}
+          </div>
+          
           {/* Reviews */}
           <div className="mb-6">
             <div className="flex justify-between items-center mb-3">
@@ -258,7 +301,7 @@ export default function SalonDetailsPage() {
                         <div className={`${isArabic ? "mr-2" : "ml-2"}`}>
                           <div className="font-medium">User {review.userId}</div>
                           <div className="text-xs text-neutral-700">
-                            {new Date(review.date).toLocaleDateString(isArabic ? 'ar-SA' : 'en-US')}
+                            {new Date(review.date ? review.date : new Date()).toLocaleDateString(isArabic ? 'ar-SA' : 'en-US')}
                           </div>
                         </div>
                       </div>
@@ -320,9 +363,15 @@ export default function SalonDetailsPage() {
                 <div>
                   <div className="font-medium">{isArabic ? "ساعات العمل" : "Working Hours"}</div>
                   <div className="text-sm text-neutral-700">
-                    {salon.openHours || (isArabic 
-                      ? "السبت - الخميس: 9:00 ص - 10:00 م، الجمعة: 2:00 م - 10:00 م" 
-                      : "Sat - Thu: 9:00 AM - 10:00 PM, Fri: 2:00 PM - 10:00 PM")}
+                    {salon.openingHours ? (
+                      typeof salon.openingHours === 'string' ? 
+                        salon.openingHours : 
+                        JSON.stringify(salon.openingHours)
+                    ) : (
+                      isArabic 
+                        ? "السبت - الخميس: 9:00 ص - 10:00 م، الجمعة: 2:00 م - 10:00 م" 
+                        : "Sat - Thu: 9:00 AM - 10:00 PM, Fri: 2:00 PM - 10:00 PM"
+                    )}
                   </div>
                 </div>
               </div>
@@ -335,7 +384,36 @@ export default function SalonDetailsPage() {
               <div className="text-neutral-700 text-sm">{isArabic ? "احجز الآن" : "Book Now"}</div>
               <div className="text-xl font-bold text-primary">{salon.name}</div>
             </div>
-            <Button className="bg-primary text-white rounded-xl py-3 px-6 flex items-center">
+            <Button 
+              onClick={() => {
+                if (!user) {
+                  toast({
+                    title: isArabic ? "يجب تسجيل الدخول" : "Login required",
+                    description: isArabic 
+                      ? "يرجى تسجيل الدخول لإكمال الحجز" 
+                      : "Please login to complete booking",
+                    variant: "destructive",
+                  });
+                  navigate("/auth");
+                  return;
+                }
+                
+                // If services are available, open modal with the first service
+                if (services && services.length > 0) {
+                  setSelectedServiceForModal(services[0]);
+                  openBookingModal(services[0]);
+                } else {
+                  toast({
+                    title: isArabic ? "لا توجد خدمات متاحة" : "No services available",
+                    description: isArabic 
+                      ? "لا توجد خدمات متاحة للحجز حالياً" 
+                      : "No services available for booking at the moment",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              className="bg-primary text-white rounded-xl py-3 px-6 flex items-center"
+            >
               <Calendar className="h-5 w-5 mr-2" />
               {isArabic ? "حجز موعد" : "Book Appointment"}
             </Button>
@@ -348,7 +426,7 @@ export default function SalonDetailsPage() {
       <BookingModal 
         isOpen={isBookingModalOpen} 
         onClose={closeBookingModal}
-        service={selectedService}
+        service={selectedServiceForModal}
       />
     </div>
   );

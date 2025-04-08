@@ -175,6 +175,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "حدث خطأ أثناء استرجاع التقييمات" });
     }
   });
+  
+  // Staff API
+  app.get("/api/salons/:id/staff", async (req, res) => {
+    try {
+      const salonId = parseInt(req.params.id);
+      const staff = await storage.getStaffBySalonId(salonId);
+      res.json(staff);
+    } catch (error) {
+      res.status(500).json({ message: "حدث خطأ أثناء استرجاع الموظفين" });
+    }
+  });
 
   app.post("/api/reviews", async (req, res) => {
     if (!req.isAuthenticated()) {
