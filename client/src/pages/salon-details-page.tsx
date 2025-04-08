@@ -9,6 +9,7 @@ import { BottomNavigation } from "@/components/layout/bottom-navigation";
 import { ServiceCard } from "@/components/ui/service-card";
 import { StaffCard } from "@/components/ui/staff-card";
 import { CategoryItem } from "@/components/ui/category-item";
+import { AIRecommendations } from "@/components/ui/ai-recommendations";
 import { Salon, Service, Review, Staff } from "@shared/schema";
 import { BookingModal } from "@/components/ui/booking-modal";
 import { useBooking } from "@/contexts/booking-context";
@@ -198,6 +199,18 @@ export default function SalonDetailsPage() {
               </p>
             )}
           </div>
+          
+          {/* AI Recommended Services */}
+          {user && (
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-3">
+                <h2 className="font-bold">{isArabic ? "مقترحات مخصصة لك" : "Recommended for You"}</h2>
+              </div>
+              <div className="bg-white rounded-xl p-4 shadow-sm">
+                <AIRecommendations salonId={Number(id)} limit={3} showReasons={true} />
+              </div>
+            </div>
+          )}
           
           {/* All Services */}
           <div className="mb-6">

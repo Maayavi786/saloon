@@ -2,9 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { insertBookingSchema, insertReviewSchema, insertPaymentTransactionSchema } from "@shared/schema";
+import { insertBookingSchema, insertReviewSchema, insertPaymentTransactionSchema, Service } from "@shared/schema";
 import Stripe from "stripe";
 import { addTestServices } from "./add-test-services";
+import { getRecommendations, generateWelcomeMessage, suggestAppointmentTimes, ServiceRecommendation } from "./ai-service";
 
 // Validate Stripe secret key exists
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -100,6 +101,170 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(featuredServices);
     } catch (error) {
       res.status(500).json({ message: "حدث خطأ أثناء استرجاع الخدمات المميزة" });
+    }
+  });
+  
+  // AI Recommendation API
+  app.get("/api/services/recommendations", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "يجب تسجيل الدخول" });
+    }
+    
+    try {
+      const { salonId, limit = 3, preferences } = req.query;
+      const salonIdNum = salonId ? parseInt(salonId as string) : undefined;
+      const limitNum = Math.min(parseInt(limit as string) || 3, 5); // Cap at 5 recommendations
+      
+      // Get user's booking history
+      const bookingHistory = await storage.getBookingsByUserId(req.user.id);
+      
+      // Get available services (filtered by salon if provided)
+      let availableServices: Service[] = [];
+      if (salonIdNum) {
+        availableServices = await storage.getServices(salonIdNum);
+      } else {
+        // Get services from featured or popular salons
+        const salons = await storage.getSalons({ city: req.user.city as string });
+        
+        // Get services from top 3 salons
+        if (salons.length > 0) {
+          const topSalons = salons.sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 3);
+          const servicesPromises = topSalons.map(salon => storage.getServices(salon.id));
+          const allSalonServices = await Promise.all(servicesPromises);
+          availableServices = allSalonServices.flat();
+        }
+      }
+      
+      if (availableServices.length === 0) {
+        return res.status(404).json({ 
+          message: "لا توجد خدمات متاحة للتوصية",
+          recommendations: []
+        });
+      }
+      
+      // Parse preferences if provided
+      const userPrefs = preferences 
+        ? (typeof preferences === 'string' ? [preferences] : preferences as string[])
+        : undefined;
+      
+      // Get recommendations from AI
+      const recommendationRequest = {
+        user: req.user,
+        bookingHistory,
+        salonId: salonIdNum,
+        preferences: userPrefs,
+        gender: req.user.gender as string,
+        city: req.user.city as string
+      };
+      
+      const recommendations = await getRecommendations(
+        recommendationRequest, 
+        availableServices, 
+        limitNum
+      );
+      
+      // Enrich recommendations with full service details
+      const enrichedRecommendations = await Promise.all(
+        recommendations.map(async (rec) => {
+          const service = await storage.getServiceById(rec.serviceId);
+          return {
+            ...rec,
+            service
+          };
+        })
+      );
+      
+      res.json({
+        recommendations: enrichedRecommendations,
+        message: "تم إنشاء التوصيات بنجاح"
+      });
+    } catch (error: any) {
+      console.error("Error generating recommendations:", error.message);
+      res.status(500).json({ 
+        message: "حدث خطأ أثناء إنشاء التوصيات",
+        error: error.message
+      });
+    }
+  });
+  
+  // Get AI-generated welcome message with recommendations
+  app.get("/api/user/welcome-message", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "يجب تسجيل الدخول" });
+    }
+    
+    try {
+      // Get user's booking history
+      const bookingHistory = await storage.getBookingsByUserId(req.user.id);
+      
+      // Get available services from featured salons
+      const salons = await storage.getSalons({ city: req.user.city as string });
+      let availableServices: Service[] = [];
+      
+      if (salons.length > 0) {
+        const topSalons = salons.sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 3);
+        const servicesPromises = topSalons.map(salon => storage.getServices(salon.id));
+        const allSalonServices = await Promise.all(servicesPromises);
+        availableServices = allSalonServices.flat();
+      }
+      
+      // Get recommendations
+      const recommendationRequest = {
+        user: req.user,
+        bookingHistory,
+        gender: req.user.gender as string,
+        city: req.user.city as string
+      };
+      
+      const recommendations = await getRecommendations(
+        recommendationRequest, 
+        availableServices, 
+        3
+      );
+      
+      // Generate welcome message with recommendations
+      const welcomeMessage = await generateWelcomeMessage(req.user, recommendations);
+      
+      res.json({
+        message: welcomeMessage,
+        recommendations
+      });
+    } catch (error: any) {
+      console.error("Error generating welcome message:", error.message);
+      res.status(500).json({ 
+        message: "حدث خطأ أثناء إنشاء رسالة الترحيب",
+        error: error.message
+      });
+    }
+  });
+  
+  // Suggest appointment times based on service and user preferences
+  app.get("/api/bookings/suggest-times/:serviceId", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "يجب تسجيل الدخول" });
+    }
+    
+    try {
+      const serviceId = parseInt(req.params.serviceId);
+      const service = await storage.getServiceById(serviceId);
+      
+      if (!service) {
+        return res.status(404).json({ message: "الخدمة غير موجودة" });
+      }
+      
+      // Get AI-suggested appointment times
+      const suggestedTimes = await suggestAppointmentTimes(service, req.user);
+      
+      res.json({
+        suggestedTimes,
+        service
+      });
+    } catch (error: any) {
+      console.error("Error suggesting appointment times:", error.message);
+      res.status(500).json({ 
+        message: "حدث خطأ أثناء اقتراح أوقات الحجز",
+        error: error.message
+      });
     }
   });
 

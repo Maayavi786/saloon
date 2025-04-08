@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/hooks/use-language";
+import { useAuth } from "@/hooks/use-auth";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Header } from "@/components/layout/header";
 import { BottomNavigation } from "@/components/layout/bottom-navigation";
 import { SalonCard } from "@/components/ui/salon-card";
 import { CategoryItem } from "@/components/ui/category-item";
 import { ServiceCard } from "@/components/ui/service-card";
+import { AIRecommendations } from "@/components/ui/ai-recommendations";
 import { Salon, Service } from "@shared/schema";
 import { MapPin, Search, SlidersHorizontal } from "lucide-react";
 import { BookingModal } from "@/components/ui/booking-modal";
@@ -14,6 +16,7 @@ import { useBooking } from "@/contexts/booking-context";
 
 export default function HomePage() {
   const { language } = useLanguage();
+  const { user } = useAuth();
   const { selectedService, isBookingModalOpen, closeBookingModal } = useBooking();
   const isArabic = language === "ar";
   
@@ -121,6 +124,13 @@ export default function HomePage() {
             </p>
           )}
         </section>
+        
+        {/* AI Recommendations */}
+        {user && (
+          <section className="mb-8 bg-white p-4 rounded-xl shadow-sm">
+            <AIRecommendations limit={3} showReasons={true} />
+          </section>
+        )}
         
         {/* Service Categories */}
         <section className="mb-8">

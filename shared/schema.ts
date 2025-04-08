@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   phoneNumber: text("phone_number").notNull(),
   role: text("role").notNull().default("customer"),
   gender: text("gender"), // male, female, other
+  city: text("city"), // User's city for location-based recommendations
   preferences: text("preferences"), // comma-separated: female_only, male_only, private_rooms, etc.
   profileImage: text("profile_image"),
   privacySettings: json("privacy_settings"), // JSON for detailed privacy configuration
