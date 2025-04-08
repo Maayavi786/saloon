@@ -442,13 +442,58 @@ export class MemStorage implements IStorage {
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
     const now = new Date();
-    const user: User = { ...insertUser, id, createdAt: now };
+    const user: User = { 
+      ...insertUser,
+      role: insertUser.role || 'customer', // Ensure role is always set
+      gender: insertUser.gender || null,
+      preferences: insertUser.preferences || null,
+      profileImage: insertUser.profileImage || null,
+      id, 
+      createdAt: now,
+      loyaltyPoints: 0,
+      lastLoginAt: null 
+    };
     this.users.set(id, user);
     return user;
   }
   
+  async updateUser(id: number, userUpdate: Partial<InsertUser>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, ...userUpdate };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async updateUserLoyaltyPoints(id: number, points: number): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const newPoints = (user.loyaltyPoints || 0) + points;
+    const updatedUser = { ...user, loyaltyPoints: newPoints };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async updateUserMembershipType(id: number, membershipType: string): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, membershipType };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
   // Salon operations
-  async getSalons(filters?: { gender?: string, city?: string }): Promise<Salon[]> {
+  async getSalons(filters?: { 
+    gender?: string, 
+    city?: string, 
+    hasPrivateRooms?: boolean, 
+    hasFemaleStaffOnly?: boolean,
+    providesHomeService?: boolean,
+    category?: string 
+  }): Promise<Salon[]> {
     let salons = Array.from(this.salons.values());
     
     if (filters) {
@@ -462,6 +507,24 @@ export class MemStorage implements IStorage {
         salons = salons.filter(salon => 
           salon.city.toLowerCase() === filters.city?.toLowerCase() ||
           salon.cityEn?.toLowerCase() === filters.city?.toLowerCase()
+        );
+      }
+      
+      if (filters.hasPrivateRooms) {
+        salons = salons.filter(salon => salon.hasPrivateRooms);
+      }
+      
+      if (filters.hasFemaleStaffOnly) {
+        salons = salons.filter(salon => salon.hasFemaleStaffOnly);
+      }
+      
+      if (filters.providesHomeService) {
+        salons = salons.filter(salon => salon.providesHomeService);
+      }
+      
+      if (filters.category) {
+        salons = salons.filter(salon => 
+          salon.categories?.includes(filters.category || '')
         );
       }
     }
@@ -503,10 +566,22 @@ export class MemStorage implements IStorage {
   }
   
   // Service operations
-  async getServices(salonId: number): Promise<Service[]> {
-    return Array.from(this.services.values()).filter(
+  async getServices(salonId: number, filters?: { category?: string, isAvailable?: boolean }): Promise<Service[]> {
+    let services = Array.from(this.services.values()).filter(
       service => service.salonId === salonId
     );
+    
+    if (filters) {
+      if (filters.category) {
+        services = services.filter(service => service.category === filters.category);
+      }
+      
+      if (filters.isAvailable !== undefined) {
+        services = services.filter(service => service.isAvailable === filters.isAvailable);
+      }
+    }
+    
+    return services;
   }
   
   async getServiceById(id: number): Promise<Service | undefined> {
@@ -519,12 +594,37 @@ export class MemStorage implements IStorage {
     );
   }
   
+  async getPromotedServices(): Promise<Service[]> {
+    return Array.from(this.services.values()).filter(
+      service => service.isPromoted
+    );
+  }
+  
   async createService(insertService: InsertService): Promise<Service> {
     const id = this.serviceIdCounter++;
     const now = new Date();
-    const service: Service = { ...insertService, id, createdAt: now };
+    const service: Service = { 
+      ...insertService, 
+      id, 
+      createdAt: now,
+      updatedAt: now
+    };
     this.services.set(id, service);
     return service;
+  }
+  
+  async updateService(id: number, serviceUpdate: Partial<InsertService>): Promise<Service | undefined> {
+    const service = this.services.get(id);
+    if (!service) return undefined;
+    
+    const now = new Date();
+    const updatedService = { 
+      ...service, 
+      ...serviceUpdate,
+      updatedAt: now 
+    };
+    this.services.set(id, updatedService);
+    return updatedService;
   }
   
   // Booking operations
@@ -540,10 +640,31 @@ export class MemStorage implements IStorage {
     );
   }
   
+  async getBookingsByServiceId(serviceId: number): Promise<Booking[]> {
+    return Array.from(this.bookings.values()).filter(
+      booking => booking.serviceId === serviceId
+    );
+  }
+  
+  async getBookingById(id: number): Promise<Booking | undefined> {
+    return this.bookings.get(id);
+  }
+  
   async createBooking(insertBooking: InsertBooking): Promise<Booking> {
     const id = this.bookingIdCounter++;
     const now = new Date();
-    const booking: Booking = { ...insertBooking, id, createdAt: now };
+    const booking: Booking = { 
+      ...insertBooking, 
+      id, 
+      createdAt: now,
+      updatedAt: now,
+      status: insertBooking.status || 'pending',
+      loyaltyPointsEarned: 0,
+      loyaltyPointsRedeemed: 0,
+      reminderSent: false,
+      isRated: false,
+      isAnonymous: insertBooking.isAnonymous || false
+    };
     this.bookings.set(id, booking);
     return booking;
   }
@@ -552,9 +673,29 @@ export class MemStorage implements IStorage {
     const booking = this.bookings.get(id);
     if (!booking) return undefined;
     
-    const updatedBooking = { ...booking, status };
+    const now = new Date();
+    const updatedBooking = { 
+      ...booking, 
+      status,
+      updatedAt: now
+    };
     this.bookings.set(id, updatedBooking);
     return updatedBooking;
+  }
+  
+  async cancelBooking(id: number): Promise<Booking | undefined> {
+    const booking = this.bookings.get(id);
+    if (!booking) return undefined;
+    
+    const now = new Date();
+    const canceledBooking = { 
+      ...booking, 
+      status: 'canceled',
+      updatedAt: now,
+      canceledAt: now
+    };
+    this.bookings.set(id, canceledBooking);
+    return canceledBooking;
   }
   
   // Review operations
@@ -564,16 +705,211 @@ export class MemStorage implements IStorage {
     );
   }
   
+  async getReviewsByUserId(userId: number): Promise<Review[]> {
+    return Array.from(this.reviews.values()).filter(
+      review => review.userId === userId
+    );
+  }
+  
+  async getReviewById(id: number): Promise<Review | undefined> {
+    return this.reviews.get(id);
+  }
+  
   async createReview(insertReview: InsertReview): Promise<Review> {
     const id = this.reviewIdCounter++;
     const now = new Date();
-    const review: Review = { ...insertReview, id, date: now };
+    const review: Review = { 
+      ...insertReview, 
+      id, 
+      date: now,
+      updatedAt: now,
+      ownerResponse: null,
+      ownerResponseDate: null,
+      isHidden: false
+    };
     this.reviews.set(id, review);
     
     // Update salon rating
     this.updateSalonRating(insertReview.salonId);
     
+    // Update booking if this review is for a booking
+    if (insertReview.bookingId) {
+      const booking = this.bookings.get(insertReview.bookingId);
+      if (booking) {
+        const updatedBooking = { ...booking, isRated: true };
+        this.bookings.set(booking.id, updatedBooking);
+      }
+    }
+    
     return review;
+  }
+  
+  async respondToReview(id: number, response: string): Promise<Review | undefined> {
+    const review = this.reviews.get(id);
+    if (!review) return undefined;
+    
+    const now = new Date();
+    const updatedReview = { 
+      ...review, 
+      ownerResponse: response,
+      ownerResponseDate: now,
+      updatedAt: now
+    };
+    this.reviews.set(id, updatedReview);
+    return updatedReview;
+  }
+  
+  // Staff operations
+  async getStaffBySalonId(salonId: number): Promise<Staff[]> {
+    return Array.from(this.staff.values()).filter(
+      staff => staff.salonId === salonId
+    );
+  }
+  
+  async getStaffById(id: number): Promise<Staff | undefined> {
+    return this.staff.get(id);
+  }
+  
+  async createStaff(insertStaff: InsertStaff): Promise<Staff> {
+    const id = this.staffIdCounter++;
+    const now = new Date();
+    const staff: Staff = { 
+      ...insertStaff, 
+      id, 
+      createdAt: now,
+      updatedAt: now
+    };
+    this.staff.set(id, staff);
+    return staff;
+  }
+  
+  async updateStaff(id: number, staffUpdate: Partial<InsertStaff>): Promise<Staff | undefined> {
+    const staff = this.staff.get(id);
+    if (!staff) return undefined;
+    
+    const now = new Date();
+    const updatedStaff = { 
+      ...staff, 
+      ...staffUpdate,
+      updatedAt: now 
+    };
+    this.staff.set(id, updatedStaff);
+    return updatedStaff;
+  }
+  
+  // Promotion operations
+  async getPromotions(filters?: { isActive?: boolean, salonId?: number }): Promise<Promotion[]> {
+    let promotions = Array.from(this.promotions.values());
+    
+    if (filters) {
+      if (filters.isActive !== undefined) {
+        promotions = promotions.filter(promo => promo.isActive === filters.isActive);
+      }
+      
+      if (filters.salonId !== undefined) {
+        promotions = promotions.filter(promo => promo.salonId === filters.salonId);
+      }
+    }
+    
+    return promotions;
+  }
+  
+  async getPromotionById(id: number): Promise<Promotion | undefined> {
+    return this.promotions.get(id);
+  }
+  
+  async getPromotionByCode(code: string): Promise<Promotion | undefined> {
+    return Array.from(this.promotions.values()).find(
+      promo => promo.code === code
+    );
+  }
+  
+  async createPromotion(insertPromotion: InsertPromotion): Promise<Promotion> {
+    const id = this.promotionIdCounter++;
+    const now = new Date();
+    const promotion: Promotion = { 
+      ...insertPromotion, 
+      id, 
+      createdAt: now,
+      updatedAt: now
+    };
+    this.promotions.set(id, promotion);
+    return promotion;
+  }
+  
+  async updatePromotion(id: number, promotionUpdate: Partial<InsertPromotion>): Promise<Promotion | undefined> {
+    const promotion = this.promotions.get(id);
+    if (!promotion) return undefined;
+    
+    const now = new Date();
+    const updatedPromotion = { 
+      ...promotion, 
+      ...promotionUpdate,
+      updatedAt: now 
+    };
+    this.promotions.set(id, updatedPromotion);
+    return updatedPromotion;
+  }
+  
+  // Membership operations
+  async getMembershipTiers(): Promise<MembershipTier[]> {
+    return Array.from(this.membershipTiers.values());
+  }
+  
+  async getMembershipTierById(id: number): Promise<MembershipTier | undefined> {
+    return this.membershipTiers.get(id);
+  }
+  
+  async getMembershipTierByPointsThreshold(points: number): Promise<MembershipTier | undefined> {
+    const tiers = Array.from(this.membershipTiers.values())
+      .sort((a, b) => b.pointsThreshold - a.pointsThreshold);
+    
+    for (const tier of tiers) {
+      if (points >= tier.pointsThreshold) {
+        return tier;
+      }
+    }
+    
+    return undefined;
+  }
+  
+  async createMembershipTier(tier: InsertMembershipTier): Promise<MembershipTier> {
+    const id = this.membershipTierIdCounter++;
+    const now = new Date();
+    const membershipTier: MembershipTier = { 
+      ...tier, 
+      id, 
+      createdAt: now,
+      updatedAt: now
+    };
+    this.membershipTiers.set(id, membershipTier);
+    return membershipTier;
+  }
+  
+  // Payment operations
+  async createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction> {
+    const id = this.paymentTransactionIdCounter++;
+    const now = new Date();
+    const paymentTransaction: PaymentTransaction = { 
+      ...transaction, 
+      id, 
+      createdAt: now,
+      updatedAt: now
+    };
+    this.paymentTransactions.set(id, paymentTransaction);
+    return paymentTransaction;
+  }
+  
+  async getPaymentTransactionsByUserId(userId: number): Promise<PaymentTransaction[]> {
+    return Array.from(this.paymentTransactions.values()).filter(
+      transaction => transaction.userId === userId
+    );
+  }
+  
+  async getPaymentTransactionsByBookingId(bookingId: number): Promise<PaymentTransaction[]> {
+    return Array.from(this.paymentTransactions.values()).filter(
+      transaction => transaction.bookingId === bookingId
+    );
   }
   
   private async updateSalonRating(salonId: number) {

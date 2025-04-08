@@ -11,11 +11,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Salons API
   app.get("/api/salons", async (req, res) => {
     try {
-      const { gender, city } = req.query;
-      const filters: { gender?: string, city?: string } = {};
+      const { 
+        gender, 
+        city, 
+        hasPrivateRooms, 
+        hasFemaleStaffOnly, 
+        providesHomeService,
+        category
+      } = req.query;
+      
+      const filters: { 
+        gender?: string, 
+        city?: string,
+        hasPrivateRooms?: boolean,
+        hasFemaleStaffOnly?: boolean,
+        providesHomeService?: boolean,
+        category?: string
+      } = {};
       
       if (gender) filters.gender = gender as string;
       if (city) filters.city = city as string;
+      
+      // Handle privacy settings
+      if (hasPrivateRooms === 'true') filters.hasPrivateRooms = true;
+      if (hasFemaleStaffOnly === 'true') filters.hasFemaleStaffOnly = true;
+      if (providesHomeService === 'true') filters.providesHomeService = true;
+      
+      // Handle category filter
+      if (category) filters.category = category as string;
       
       const salons = await storage.getSalons(filters);
       res.json(salons);
@@ -43,7 +66,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/salons/:id/services", async (req, res) => {
     try {
       const salonId = parseInt(req.params.id);
-      const services = await storage.getServices(salonId);
+      const { category, isAvailable } = req.query;
+      
+      const filters: { 
+        category?: string, 
+        isAvailable?: boolean
+      } = {};
+      
+      if (category) filters.category = category as string;
+      if (isAvailable === 'true') filters.isAvailable = true;
+      
+      const services = await storage.getServices(salonId, filters);
       res.json(services);
     } catch (error) {
       res.status(500).json({ message: "حدث خطأ أثناء استرجاع الخدمات" });

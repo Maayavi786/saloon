@@ -5,6 +5,7 @@ import AuthPage from "@/pages/auth-page";
 import SalonDetailsPage from "@/pages/salon-details-page";
 import MyBookingsPage from "@/pages/my-bookings-page";
 import ProfilePage from "@/pages/profile-page";
+import MapExplorer from "@/pages/map-explorer";
 import { ProtectedRoute } from "./lib/protected-route";
 import { LanguageProvider } from "@/hooks/use-language";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -25,6 +26,9 @@ function App() {
             </Route>
             <Route path="/salon/:id">
               <SalonDetailsPage />
+            </Route>
+            <Route path="/map">
+              <MapExplorer />
             </Route>
             <ProtectedRoute path="/bookings" component={MyBookingsPage} />
             <ProtectedRoute path="/profile" component={ProfilePage} />
