@@ -280,6 +280,103 @@ export class MemStorage implements IStorage {
       isActive: true
     });
     
+    // Add Al-Ahsa Salons
+    this.createSalon({
+      name: "واحة الجمال",
+      nameEn: "Oasis Beauty Salon",
+      description: "صالون تجميل نسائي متميز يقدم جميع خدمات التجميل والعناية بالبشرة والشعر بأحدث التقنيات وعلى أيدي خبيرات متخصصات",
+      descriptionEn: "A distinguished women's beauty salon offering all beauty, skin, and hair care services with the latest techniques by specialized experts",
+      address: "شارع الظهران، حي المبرز، الأحساء",
+      addressEn: "Dhahran Street, Al Mubarraz District, Al-Ahsa",
+      city: "الأحساء",
+      cityEn: "Al-Ahsa",
+      phoneNumber: "+966554789123",
+      email: "oasisbeauty@example.com",
+      gender: "female_only",
+      openingHours: "9:00 - 22:00",
+      latitude: 25.4167,
+      longitude: 49.5833,
+      ownerId: 3,
+      logo: "https://img.freepik.com/premium-vector/beauty-hair-salon-logo-design_139869-144.jpg",
+      coverImage: "https://img.freepik.com/premium-photo/beauty-salon-interior-makeup-manicure-hairdressing-services_265223-33263.jpg",
+      images: ["https://img.freepik.com/free-photo/woman-beauty-salon-getting-makeup-done_1303-12917.jpg", "https://img.freepik.com/free-photo/hairdresser-cutting-woman-s-hair-beauty-salon_1303-26263.jpg"],
+      amenities: "wifi,parking,coffee,prayer_area,kids_play_area",
+      categories: "hair,makeup,nails,facial,spa,bridal,henna",
+      isActive: true
+    });
+    
+    this.createSalon({
+      name: "الأصالة للحلاقة الرجالية",
+      nameEn: "Al Asala Men's Salon",
+      description: "صالون حلاقة رجالي تقليدي يقدم خدمات الحلاقة وتهذيب اللحية والعناية بالبشرة مع لمسة من التراث السعودي الأصيل",
+      descriptionEn: "A traditional men's barber shop offering haircuts, beard trimming, and skin care services with a touch of authentic Saudi heritage",
+      address: "طريق الملك فهد، حي الهفوف، الأحساء",
+      addressEn: "King Fahd Road, Al Hofuf District, Al-Ahsa",
+      city: "الأحساء",
+      cityEn: "Al-Ahsa",
+      phoneNumber: "+966556789012",
+      email: "alasala@example.com",
+      gender: "male_only",
+      openingHours: "10:00 - 23:00",
+      latitude: 25.3783,
+      longitude: 49.5869,
+      ownerId: 3,
+      logo: "https://img.freepik.com/premium-vector/barber-pole-vintage-barber-shop-logo_97843-206.jpg",
+      coverImage: "https://img.freepik.com/premium-photo/contemporary-barber-shop-salon-with-modern-hairdressing-equipment-tools_613961-14457.jpg",
+      images: ["https://img.freepik.com/premium-photo/male-barber-cutting-client-s-hair-barber-shop_97800-344.jpg", "https://img.freepik.com/free-photo/man-barbershop-salon-doing-hairstyle_1303-20932.jpg"],
+      amenities: "wifi,parking,coffee,prayer_area,tv",
+      categories: "haircut,beard,skin_care,traditional_shave",
+      isActive: true
+    });
+    
+    this.createSalon({
+      name: "سيدرا سبا",
+      nameEn: "Sidra Spa & Beauty",
+      description: "مركز سبا وتجميل متكامل للنساء يقدم علاجات مميزة للوجه والجسم والشعر في بيئة فاخرة وهادئة",
+      descriptionEn: "A comprehensive spa and beauty center for women offering premium treatments for face, body, and hair in a luxurious and tranquil environment",
+      address: "شارع الأمير محمد بن فهد، حي العزيزية، الأحساء",
+      addressEn: "Prince Mohammed Bin Fahd Street, Al Aziziyah District, Al-Ahsa",
+      city: "الأحساء",
+      cityEn: "Al-Ahsa",
+      phoneNumber: "+966557890123",
+      email: "sidraspa@example.com",
+      gender: "female_only",
+      openingHours: "10:00 - 22:00",
+      latitude: 25.4000,
+      longitude: 49.6000,
+      ownerId: 3,
+      logo: "https://img.freepik.com/premium-vector/luxury-spa-logo-design_139869-88.jpg",
+      coverImage: "https://img.freepik.com/premium-photo/beauty-salon-interior-composition-flowers-treatment-room_93675-128458.jpg",
+      images: ["https://img.freepik.com/free-photo/top-view-woman-getting-spa-treatment_23-2149559158.jpg", "https://img.freepik.com/free-photo/massage-room-with-candles-flowers_144627-46197.jpg"],
+      amenities: "wifi,parking,refreshments,steam_room,sauna,jacuzzi,prayer_area",
+      categories: "spa,massage,facial,body_treatments,hair,makeup",
+      isActive: true
+    });
+    
+    this.createSalon({
+      name: "أريج للتجميل",
+      nameEn: "Areej Beauty Center",
+      description: "مركز تجميل متكامل يقدم خدمات العناية بالبشرة والشعر والأظافر وخدمات المكياج بأحدث المنتجات وأفضل الخبرات",
+      descriptionEn: "A comprehensive beauty center offering skin care, hair, nails, and makeup services with the latest products and best expertise",
+      address: "شارع الخليج، حي المطيرفي، الأحساء",
+      addressEn: "Al Khaleej Street, Al Mutairfi District, Al-Ahsa",
+      city: "الأحساء",
+      cityEn: "Al-Ahsa",
+      phoneNumber: "+966558901234",
+      email: "areejbeauty@example.com",
+      gender: "female_only",
+      openingHours: "9:00 - 21:00",
+      latitude: 25.3950,
+      longitude: 49.5930,
+      ownerId: 3,
+      logo: "https://img.freepik.com/premium-vector/creative-beauty-logo-design-branding_96318-358.jpg",
+      coverImage: "https://img.freepik.com/premium-photo/female-hairdresser-working-beauty-salon_85574-3751.jpg",
+      images: ["https://img.freepik.com/free-photo/nail-salon-concept-with-woman-doing-her-manicure_23-2149230141.jpg", "https://img.freepik.com/free-photo/beauty-salon-implements-beautiful-nails_186202-3350.jpg"],
+      amenities: "wifi,parking,refreshments,prayer_area",
+      categories: "hair,makeup,nails,facial,bridal",
+      isActive: true
+    });
+    
     // Add services
     // Female salon services
     this.createService({
