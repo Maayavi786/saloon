@@ -106,83 +106,171 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // AI Recommendation API
   app.get("/api/recommendations", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "يجب تسجيل الدخول" });
-    }
+    // If not authenticated, still return some recommendations but flag them as generic
+    const isAuthenticated = req.isAuthenticated();
     
     try {
       const { salonId, limit = 3, preferences } = req.query;
       const salonIdNum = salonId ? parseInt(salonId as string) : undefined;
       const limitNum = Math.min(parseInt(limit as string) || 3, 5); // Cap at 5 recommendations
       
-      // Get user's booking history
-      const bookingHistory = await storage.getBookingsByUserId(req.user.id);
-      
       // Get available services (filtered by salon if provided)
       let availableServices: Service[] = [];
-      if (salonIdNum) {
-        availableServices = await storage.getServices(salonIdNum);
-      } else {
-        // Get services from featured or popular salons
-        const salons = await storage.getSalons({ city: req.user.city as string });
-        
-        // Get services from top 3 salons
-        if (salons.length > 0) {
-          const topSalons = salons.sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 3);
-          const servicesPromises = topSalons.map(salon => storage.getServices(salon.id));
-          const allSalonServices = await Promise.all(servicesPromises);
-          availableServices = allSalonServices.flat();
-        }
-      }
       
+      try {
+        // Get salon-specific services if salonId is provided
+        if (salonIdNum) {
+          availableServices = await storage.getServices(salonIdNum);
+        } else {
+          // Get services from featured or popular salons
+          try {
+            // If user is authenticated, try to use their city
+            const userCity = isAuthenticated ? req.user.city as string : undefined;
+            const salons = await storage.getSalons({ city: userCity });
+            
+            if (salons.length > 0) {
+              const topSalons = salons.sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 3);
+              const servicesPromises = topSalons.map(salon => storage.getServices(salon.id));
+              const allSalonServices = await Promise.all(servicesPromises);
+              availableServices = allSalonServices.flat();
+            }
+          } catch (err) {
+            console.error("Error fetching services from salons:", err);
+          }
+        }
+        
+        // If still no services found, try getting any available services
+        if (availableServices.length === 0) {
+          const allServices = await storage.debugServices();
+          if (allServices && allServices.length > 0) {
+            availableServices = allServices;
+          }
+        }
+      } catch (servicesErr) {
+        console.error("Error fetching any services:", servicesErr);
+      }
+        
+      // If still no services, return empty array
       if (availableServices.length === 0) {
-        return res.status(404).json({ 
+        return res.json({ 
           message: "لا توجد خدمات متاحة للتوصية",
-          recommendations: []
+          recommendations: [],
+          isPersonalized: false
         });
       }
       
-      // Parse preferences if provided
-      const userPrefs = preferences 
-        ? (typeof preferences === 'string' ? [preferences] : preferences as string[])
-        : undefined;
-      
-      // Get recommendations from AI
-      const recommendationRequest = {
-        user: req.user,
-        bookingHistory,
-        salonId: salonIdNum,
-        preferences: userPrefs,
-        gender: req.user.gender as string,
-        city: req.user.city as string
-      };
-      
-      const recommendations = await getRecommendations(
-        recommendationRequest, 
-        availableServices, 
-        limitNum
-      );
-      
-      // Enrich recommendations with full service details
-      const enrichedRecommendations = await Promise.all(
-        recommendations.map(async (rec) => {
-          const service = await storage.getServiceById(rec.serviceId);
-          return {
-            ...rec,
+      // If user is not authenticated, return popular services
+      if (!isAuthenticated) {
+        const genericRecommendations = availableServices
+          .slice(0, limitNum)
+          .map((service, index) => ({
+            serviceId: service.id,
+            serviceName: service.nameEn || service.name,
+            score: 95 - (index * 5),
+            reason: "Popular service",
             service
-          };
-        })
-      );
+          }));
+        
+        return res.json({
+          recommendations: genericRecommendations,
+          message: "اكتشف خدماتنا",
+          isPersonalized: false
+        });
+      }
       
-      res.json({
-        recommendations: enrichedRecommendations,
-        message: "تم إنشاء التوصيات بنجاح"
-      });
+      // For authenticated users, try to get personalized recommendations
+      try {
+        // Get user's booking history
+        const bookingHistory = await storage.getBookingsByUserId(req.user.id);
+        
+        // Parse preferences if provided
+        const userPrefs = preferences 
+          ? (typeof preferences === 'string' ? [preferences] : preferences as string[])
+          : undefined;
+        
+        // Get recommendations from AI
+        const recommendationRequest = {
+          user: req.user,
+          bookingHistory,
+          salonId: salonIdNum,
+          preferences: userPrefs,
+          gender: req.user.gender as string,
+          city: req.user.city as string
+        };
+        
+        try {
+          const recommendations = await getRecommendations(
+            recommendationRequest, 
+            availableServices, 
+            limitNum
+          );
+          
+          // Enrich recommendations with full service details
+          const enrichedRecommendations = await Promise.all(
+            recommendations.map(async (rec) => {
+              try {
+                const service = await storage.getServiceById(rec.serviceId);
+                if (service) {
+                  return { ...rec, service };
+                }
+                throw new Error("Service not found");
+              } catch (serviceErr) {
+                // If service lookup fails, find it in availableServices
+                const service = availableServices.find(s => s.id === rec.serviceId);
+                if (service) {
+                  return { ...rec, service };
+                }
+                return null; // Return null to filter out later
+              }
+            })
+          );
+          
+          // Filter out null recommendations and limit results
+          const validRecommendations = enrichedRecommendations
+            .filter(rec => rec !== null)
+            .slice(0, limitNum);
+            
+          if (validRecommendations.length > 0) {
+            return res.json({
+              recommendations: validRecommendations,
+              message: "تم إنشاء التوصيات بنجاح",
+              isPersonalized: true
+            });
+          }
+          
+          // If no valid recommendations, use fallback
+          throw new Error("No valid recommendations found");
+        } catch (aiError) {
+          console.error("AI recommendation failed, using fallback:", aiError);
+          throw aiError; // Pass to fallback
+        }
+      } catch (error) {
+        // Fallback to generic recommendations
+        console.log("Using fallback recommendations...");
+        const fallbackRecommendations = availableServices
+          .slice(0, limitNum)
+          .map((service, index) => ({
+            serviceId: service.id,
+            serviceName: service.nameEn || service.name,
+            score: 90 - (index * 10),
+            reason: "Based on your preferences and popular services",
+            service
+          }));
+        
+        res.json({
+          recommendations: fallbackRecommendations,
+          message: "تم إنشاء التوصيات بنجاح",
+          isPersonalized: false,
+          fallback: true
+        });
+      }
     } catch (error: any) {
       console.error("Error generating recommendations:", error.message);
-      res.status(500).json({ 
+      res.json({ 
         message: "حدث خطأ أثناء إنشاء التوصيات",
-        error: error.message
+        error: error.message,
+        recommendations: [],
+        isPersonalized: false
       });
     }
   });

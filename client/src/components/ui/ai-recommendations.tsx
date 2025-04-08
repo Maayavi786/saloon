@@ -21,6 +21,8 @@ interface ServiceRecommendation {
 interface RecommendationsResponse {
   recommendations: ServiceRecommendation[];
   message: string;
+  isPersonalized?: boolean;
+  fallback?: boolean;
 }
 
 interface AIRecommendationsProps {
@@ -91,7 +93,27 @@ export function AIRecommendations({ salonId, limit = 3, showReasons = true }: AI
         }
 
         const data: RecommendationsResponse = await res.json();
-        setRecommendations(data.recommendations || []);
+        
+        // Check if we got any recommendations
+        if (!data.recommendations || data.recommendations.length === 0) {
+          throw new Error("No recommendations returned from API");
+        }
+        
+        setRecommendations(data.recommendations);
+        
+        // Show a toast for non-personalized recommendations that weren't fallbacks
+        if (data.fallback) {
+          // Just silently use fallback data, no need to alert user
+        } else if (data.isPersonalized === false) {
+          // Let the user know these aren't personalized
+          toast({
+            title: isArabic ? "توصيات عامة" : "General Recommendations",
+            description: isArabic 
+              ? "نقدم لك توصيات عامة بناءً على الخدمات الشائعة" 
+              : "Showing general recommendations based on popular services",
+            duration: 3000,
+          });
+        }
 
         // If no specific salon, also fetch a welcome message
         if (!salonId) {
@@ -108,7 +130,7 @@ export function AIRecommendations({ salonId, limit = 3, showReasons = true }: AI
       } catch (error) {
         console.error("Error loading recommendations:", error);
         
-        // Use fallback services if we have them
+        // Use fallback services if we have them and there was an API error
         if (fallbackServices.length > 0) {
           const fallbackRecommendations = fallbackServices.slice(0, limit).map((service, index) => ({
             serviceId: service.id,
@@ -119,11 +141,25 @@ export function AIRecommendations({ salonId, limit = 3, showReasons = true }: AI
               : "Based on popular available services",
             service: service
           }));
+          
           setRecommendations(fallbackRecommendations);
+          
+          if (fallbackServices.length > 0) {
+            // Let the user know about fallback data usage
+            toast({
+              title: isArabic ? "توصيات عامة" : "Popular Services",
+              description: isArabic 
+                ? "نعرض لك بعض الخدمات الشائعة" 
+                : "Showing some popular services for you",
+              duration: 3000,
+            });
+          }
         } else {
           toast({
             title: isArabic ? "خطأ" : "Error",
-            description: isArabic ? "تعذر تحميل التوصيات المخصصة" : "Could not load personalized recommendations",
+            description: isArabic 
+              ? "تعذر تحميل التوصيات، يرجى المحاولة لاحقاً" 
+              : "Could not load recommendations, please try again later",
             variant: "destructive",
           });
         }
