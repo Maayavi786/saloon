@@ -201,16 +201,31 @@ export default function SalonDetailsPage() {
           </div>
           
           {/* AI Recommended Services */}
-          {user && (
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-3">
-                <h2 className="font-bold">{isArabic ? "مقترحات مخصصة لك" : "Recommended for You"}</h2>
-              </div>
+          <div className="mb-6">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="font-bold">{isArabic ? "مقترحات مخصصة لك" : "Recommended for You"}</h2>
+            </div>
+            {user ? (
               <div className="bg-white rounded-xl p-4 shadow-sm">
                 <AIRecommendations salonId={Number(id)} limit={3} showReasons={true} />
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="bg-white rounded-xl p-4 shadow-sm text-center">
+                <p className="text-muted-foreground mb-3">
+                  {isArabic 
+                    ? "قم بتسجيل الدخول للحصول على توصيات مخصصة لك"
+                    : "Login to get personalized recommendations"}
+                </p>
+                <Button 
+                  onClick={() => navigate("/auth")}
+                  variant="outline"
+                  className="mx-auto"
+                >
+                  {isArabic ? "تسجيل الدخول" : "Login"}
+                </Button>
+              </div>
+            )}
+          </div>
           
           {/* All Services */}
           <div className="mb-6">

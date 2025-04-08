@@ -98,7 +98,18 @@ export function AIRecommendations({ salonId, limit = 3, showReasons = true }: AI
     }
   };
 
-  if (!user) return null;
+  if (!user) {
+    if (loading) return null;
+    return (
+      <div className="text-center py-6">
+        <p className="text-muted-foreground">
+          {isArabic 
+            ? "سجل دخول للحصول على توصيات مخصصة" 
+            : "Sign in to see personalized recommendations"}
+        </p>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

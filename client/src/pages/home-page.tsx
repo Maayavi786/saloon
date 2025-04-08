@@ -126,11 +126,26 @@ export default function HomePage() {
         </section>
         
         {/* AI Recommendations */}
-        {user && (
-          <section className="mb-8 bg-white p-4 rounded-xl shadow-sm">
+        <section className="mb-8 bg-white p-4 rounded-xl shadow-sm">
+          {user ? (
             <AIRecommendations limit={3} showReasons={true} />
-          </section>
-        )}
+          ) : (
+            <div className="text-center py-4">
+              <h3 className="text-lg font-bold mb-2">{isArabic ? "توصيات مخصصة لك" : "Personalized Recommendations"}</h3>
+              <p className="text-muted-foreground mb-4">
+                {isArabic 
+                  ? "سجل دخول للحصول على توصيات شخصية بناءً على تفضيلاتك وتاريخ حجزك"
+                  : "Sign in to get personalized recommendations based on your preferences and booking history"}
+              </p>
+              <button 
+                onClick={() => window.location.href = "/auth"}
+                className="bg-primary/10 text-primary px-4 py-2 rounded-md font-medium"
+              >
+                {isArabic ? "تسجيل الدخول" : "Sign In"}
+              </button>
+            </div>
+          )}
+        </section>
         
         {/* Service Categories */}
         <section className="mb-8">
