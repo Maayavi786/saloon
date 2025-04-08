@@ -38,6 +38,29 @@ export function AIRecommendations({ salonId, limit = 3, showReasons = true }: AI
   const [loading, setLoading] = useState(true);
   const [recommendations, setRecommendations] = useState<ServiceRecommendation[]>([]);
   const [welcomeMessage, setWelcomeMessage] = useState<string>("");
+  const [fallbackServices, setFallbackServices] = useState<Service[]>([]);
+
+  // Load fallback services on component mount
+  useEffect(() => {
+    const loadFallbackServices = async () => {
+      try {
+        // Determine endpoint based on whether we have a salonId
+        const endpoint = salonId 
+          ? `/api/salons/${salonId}/services/featured` 
+          : `/api/services/featured`;
+          
+        const res = await apiRequest("GET", endpoint);
+        if (res.ok) {
+          const services = await res.json();
+          setFallbackServices(services || []);
+        }
+      } catch (error) {
+        console.error("Error loading fallback services:", error);
+      }
+    };
+    
+    loadFallbackServices();
+  }, [salonId]);
 
   useEffect(() => {
     const loadRecommendations = async () => {
@@ -78,11 +101,26 @@ export function AIRecommendations({ salonId, limit = 3, showReasons = true }: AI
         }
       } catch (error) {
         console.error("Error loading recommendations:", error);
-        toast({
-          title: isArabic ? "خطأ" : "Error",
-          description: isArabic ? "تعذر تحميل التوصيات المخصصة" : "Could not load personalized recommendations",
-          variant: "destructive",
-        });
+        
+        // Use fallback services if we have them
+        if (fallbackServices.length > 0) {
+          const fallbackRecommendations = fallbackServices.slice(0, limit).map((service, index) => ({
+            serviceId: service.id,
+            serviceName: service.nameEn || service.name,
+            score: 90 - (index * 10),
+            reason: isArabic 
+              ? "بناءً على الخدمات الشائعة المتاحة" 
+              : "Based on popular available services",
+            service: service
+          }));
+          setRecommendations(fallbackRecommendations);
+        } else {
+          toast({
+            title: isArabic ? "خطأ" : "Error",
+            description: isArabic ? "تعذر تحميل التوصيات المخصصة" : "Could not load personalized recommendations",
+            variant: "destructive",
+          });
+        }
       } finally {
         setLoading(false);
       }
@@ -93,7 +131,7 @@ export function AIRecommendations({ salonId, limit = 3, showReasons = true }: AI
     } else {
       setLoading(false);
     }
-  }, [user, salonId, limit, toast]);
+  }, [user, salonId, limit, toast, fallbackServices, isArabic]);
 
   const handleBookService = (recommendation: ServiceRecommendation) => {
     if (recommendation.service) {
