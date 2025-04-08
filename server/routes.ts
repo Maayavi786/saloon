@@ -152,6 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
       // If still no services, return empty array
       if (availableServices.length === 0) {
+        res.setHeader('Content-Type', 'application/json');
         return res.json({ 
           message: "لا توجد خدمات متاحة للتوصية",
           recommendations: [],
@@ -171,6 +172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             service
           }));
         
+        res.setHeader('Content-Type', 'application/json');
         return res.json({
           recommendations: genericRecommendations,
           message: "اكتشف خدماتنا",
@@ -231,6 +233,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .slice(0, limitNum);
             
           if (validRecommendations.length > 0) {
+            res.setHeader('Content-Type', 'application/json');
             return res.json({
               recommendations: validRecommendations,
               message: "تم إنشاء التوصيات بنجاح",
@@ -257,6 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             service
           }));
         
+        res.setHeader('Content-Type', 'application/json');
         res.json({
           recommendations: fallbackRecommendations,
           message: "تم إنشاء التوصيات بنجاح",
@@ -266,6 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     } catch (error: any) {
       console.error("Error generating recommendations:", error.message);
+      res.setHeader('Content-Type', 'application/json');
       res.json({ 
         message: "حدث خطأ أثناء إنشاء التوصيات",
         error: error.message,

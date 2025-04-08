@@ -92,11 +92,22 @@ export function AIRecommendations({ salonId, limit = 3, showReasons = true }: AI
           throw new Error("Failed to load recommendations");
         }
 
-        const data: RecommendationsResponse = await res.json();
-        
-        // Check if we got any recommendations
-        if (!data.recommendations || data.recommendations.length === 0) {
-          throw new Error("No recommendations returned from API");
+        let data: RecommendationsResponse;
+        try {
+          data = await res.json();
+          // Check if the response is not JSON or doesn't have recommendations
+          if (!data || typeof data !== 'object' || !('recommendations' in data)) {
+            console.error("Invalid response format from recommendations API:", data);
+            throw new Error("Invalid response format");
+          }
+          
+          // Check if we got any recommendations
+          if (!data.recommendations || data.recommendations.length === 0) {
+            throw new Error("No recommendations returned from API");
+          }
+        } catch (parseError) {
+          console.error("Failed to parse recommendations response:", parseError);
+          throw new Error("Invalid response format");
         }
         
         setRecommendations(data.recommendations);
