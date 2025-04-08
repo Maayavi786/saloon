@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertBookingSchema, insertReviewSchema, insertPaymentTransactionSchema } from "@shared/schema";
 import Stripe from "stripe";
+import { addTestServices } from "./add-test-services";
 
 // Validate Stripe secret key exists
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -114,6 +115,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(service);
     } catch (error) {
       res.status(500).json({ message: "حدث خطأ أثناء استرجاع الخدمة" });
+    }
+  });
+  
+  // Endpoint to add test services to all salons
+  app.post("/api/admin/add-test-services", async (req, res) => {
+    try {
+      await addTestServices();
+      res.status(201).json({ message: "تم إضافة الخدمات التجريبية بنجاح" });
+    } catch (error: any) {
+      console.error("Error adding test services:", error.message);
+      res.status(500).json({ 
+        message: "حدث خطأ أثناء إضافة الخدمات التجريبية",
+        error: error.message 
+      });
     }
   });
 
