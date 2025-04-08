@@ -1,13 +1,19 @@
-import { users, salons, services, bookings, reviews } from "@shared/schema";
+import { 
+  users, salons, services, bookings, reviews, 
+  staff, promotions, membershipTiers, paymentTransactions 
+} from "@shared/schema";
 import type { 
   User, InsertUser, Salon, InsertSalon, 
   Service, InsertService, Booking, InsertBooking,
-  Review, InsertReview 
+  Review, InsertReview, Staff, InsertStaff,
+  Promotion, InsertPromotion, MembershipTier, InsertMembershipTier,
+  PaymentTransaction, InsertPaymentTransaction
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
 const MemoryStore = createMemoryStore(session);
+type SessionStore = ReturnType<typeof createMemoryStore>;
 
 // Interface for storage operations
 export interface IStorage {
@@ -15,32 +21,74 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, user: Partial<InsertUser>): Promise<User | undefined>;
+  updateUserLoyaltyPoints(id: number, points: number): Promise<User | undefined>;
+  updateUserMembershipType(id: number, membershipType: string): Promise<User | undefined>;
   
   // Salon operations
-  getSalons(filters?: { gender?: string, city?: string }): Promise<Salon[]>;
+  getSalons(filters?: { 
+    gender?: string, 
+    city?: string, 
+    hasPrivateRooms?: boolean, 
+    hasFemaleStaffOnly?: boolean,
+    providesHomeService?: boolean,
+    category?: string 
+  }): Promise<Salon[]>;
   getSalonById(id: number): Promise<Salon | undefined>;
   getSalonsByOwnerId(ownerId: number): Promise<Salon[]>;
   createSalon(salon: InsertSalon): Promise<Salon>;
   updateSalon(id: number, salon: Partial<InsertSalon>): Promise<Salon | undefined>;
   
   // Service operations
-  getServices(salonId: number): Promise<Service[]>;
+  getServices(salonId: number, filters?: { category?: string, isAvailable?: boolean }): Promise<Service[]>;
   getServiceById(id: number): Promise<Service | undefined>;
   getFeaturedServices(salonId: number): Promise<Service[]>;
+  getPromotedServices(): Promise<Service[]>;
   createService(service: InsertService): Promise<Service>;
+  updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined>;
   
   // Booking operations
   getBookingsByUserId(userId: number): Promise<Booking[]>;
   getBookingsBySalonId(salonId: number): Promise<Booking[]>;
+  getBookingsByServiceId(serviceId: number): Promise<Booking[]>;
+  getBookingById(id: number): Promise<Booking | undefined>;
   createBooking(booking: InsertBooking): Promise<Booking>;
   updateBookingStatus(id: number, status: string): Promise<Booking | undefined>;
+  cancelBooking(id: number): Promise<Booking | undefined>;
   
   // Review operations
   getReviewsBySalonId(salonId: number): Promise<Review[]>;
+  getReviewsByUserId(userId: number): Promise<Review[]>;
+  getReviewById(id: number): Promise<Review | undefined>;
   createReview(review: InsertReview): Promise<Review>;
+  respondToReview(id: number, response: string): Promise<Review | undefined>;
+  
+  // Staff operations
+  getStaffBySalonId(salonId: number): Promise<Staff[]>;
+  getStaffById(id: number): Promise<Staff | undefined>;
+  createStaff(staff: InsertStaff): Promise<Staff>;
+  updateStaff(id: number, staff: Partial<InsertStaff>): Promise<Staff | undefined>;
+  
+  // Promotion operations
+  getPromotions(filters?: { isActive?: boolean, salonId?: number }): Promise<Promotion[]>;
+  getPromotionById(id: number): Promise<Promotion | undefined>;
+  getPromotionByCode(code: string): Promise<Promotion | undefined>;
+  createPromotion(promotion: InsertPromotion): Promise<Promotion>;
+  updatePromotion(id: number, promotion: Partial<InsertPromotion>): Promise<Promotion | undefined>;
+  
+  // Membership operations
+  getMembershipTiers(): Promise<MembershipTier[]>;
+  getMembershipTierById(id: number): Promise<MembershipTier | undefined>;
+  getMembershipTierByPointsThreshold(points: number): Promise<MembershipTier | undefined>;
+  createMembershipTier(tier: InsertMembershipTier): Promise<MembershipTier>;
+  
+  // Payment operations
+  createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction>;
+  getPaymentTransactionsByUserId(userId: number): Promise<PaymentTransaction[]>;
+  getPaymentTransactionsByBookingId(bookingId: number): Promise<PaymentTransaction[]>;
   
   // Session store
-  sessionStore: session.SessionStore;
+  sessionStore: SessionStore;
 }
 
 export class MemStorage implements IStorage {
@@ -49,14 +97,22 @@ export class MemStorage implements IStorage {
   private services: Map<number, Service>;
   private bookings: Map<number, Booking>;
   private reviews: Map<number, Review>;
+  private staff: Map<number, Staff>;
+  private promotions: Map<number, Promotion>;
+  private membershipTiers: Map<number, MembershipTier>;
+  private paymentTransactions: Map<number, PaymentTransaction>;
   
-  sessionStore: session.SessionStore;
+  sessionStore: SessionStore;
   
   private userIdCounter: number;
   private salonIdCounter: number;
   private serviceIdCounter: number;
   private bookingIdCounter: number;
   private reviewIdCounter: number;
+  private staffIdCounter: number;
+  private promotionIdCounter: number;
+  private membershipTierIdCounter: number;
+  private paymentTransactionIdCounter: number;
 
   constructor() {
     this.users = new Map();
@@ -64,12 +120,20 @@ export class MemStorage implements IStorage {
     this.services = new Map();
     this.bookings = new Map();
     this.reviews = new Map();
+    this.staff = new Map();
+    this.promotions = new Map();
+    this.membershipTiers = new Map();
+    this.paymentTransactions = new Map();
     
     this.userIdCounter = 1;
     this.salonIdCounter = 1;
     this.serviceIdCounter = 1;
     this.bookingIdCounter = 1;
     this.reviewIdCounter = 1;
+    this.staffIdCounter = 1;
+    this.promotionIdCounter = 1;
+    this.membershipTierIdCounter = 1;
+    this.paymentTransactionIdCounter = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // 24 hours
