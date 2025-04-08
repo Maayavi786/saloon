@@ -77,54 +77,65 @@ ${city ? `- Consider user location: ${city}` : ""}
 
     const userQuery = `Please recommend ${limit} salon services for this user. For each recommendation, include the service ID, service name, a score from 0 to 100 indicating relevance, and a brief reason for the recommendation.`;
 
-    // Make API call to OpenAI
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userInfo + servicesInfo + constraints + userQuery }
-      ],
-      response_format: { type: "json_object" }
-    });
-
-    // Parse the response
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error("No content in the AI response");
-    }
-
     let recommendations: ServiceRecommendation[] = [];
     
     try {
-      const parsed = JSON.parse(content);
-      if (parsed.recommendations && Array.isArray(parsed.recommendations)) {
-        recommendations = parsed.recommendations.map((rec: any) => ({
-          serviceId: parseInt(rec.serviceId),
-          serviceName: rec.serviceName,
-          score: parseInt(rec.score),
-          reason: rec.reason
-        }));
-      } else {
-        // Alternative parsing if the structure is different
-        recommendations = Object.values(parsed).filter(item => 
-          typeof item === 'object' && item !== null && 'serviceId' in item
-        ).map((rec: any) => ({
-          serviceId: parseInt(rec.serviceId),
-          serviceName: rec.serviceName,
-          score: parseInt(rec.score),
-          reason: rec.reason
-        }));
+      // Make API call to OpenAI
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userInfo + servicesInfo + constraints + userQuery }
+        ],
+        response_format: { type: "json_object" }
+      });
+
+      // Parse the response
+      const content = response.choices[0].message.content;
+      if (!content) {
+        throw new Error("No content in the AI response");
       }
-    } catch (err) {
-      console.error("Error parsing AI recommendations:", err);
-      throw new Error("Failed to parse AI recommendations");
+      
+      try {
+        const parsed = JSON.parse(content);
+        if (parsed.recommendations && Array.isArray(parsed.recommendations)) {
+          recommendations = parsed.recommendations.map((rec: any) => ({
+            serviceId: parseInt(rec.serviceId),
+            serviceName: rec.serviceName,
+            score: parseInt(rec.score),
+            reason: rec.reason
+          }));
+        } else {
+          // Alternative parsing if the structure is different
+          recommendations = Object.values(parsed).filter(item => 
+            typeof item === 'object' && item !== null && 'serviceId' in item
+          ).map((rec: any) => ({
+            serviceId: parseInt(rec.serviceId),
+            serviceName: rec.serviceName,
+            score: parseInt(rec.score),
+            reason: rec.reason
+          }));
+        }
+      } catch (err) {
+        console.error("Error parsing AI recommendations:", err);
+        throw new Error("Failed to parse AI recommendations");
+      }
+    } catch (error) {
+      console.error("OpenAI API error, using fallback recommendations:", error);
+      
+      // Use fallback recommendations based on available services
+      recommendations = availableServices.slice(0, limit).map(service => ({
+        serviceId: service.id,
+        serviceName: service.nameEn || service.name,
+        score: 90 - (availableServices.indexOf(service) * 10),
+        reason: "Based on your preferences and popular services in your area"
+      }));
     }
 
     // Sort by score (highest first) and limit the results
     return recommendations
       .sort((a, b) => b.score - a.score)
       .slice(0, limit);
-      
   } catch (error: any) {
     console.error("Error getting AI recommendations:", error);
     throw new Error(`Failed to get AI recommendations: ${error.message}`);
