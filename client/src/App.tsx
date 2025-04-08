@@ -14,32 +14,34 @@ import { Toaster } from "@/components/ui/toaster";
 
 function App() {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <BookingProvider>
-          <Switch>
-            <Route path="/auth">
-              <AuthPage />
-            </Route>
-            <Route path="/">
-              <HomePage />
-            </Route>
-            <Route path="/salon/:id">
-              <SalonDetailsPage />
-            </Route>
-            <Route path="/map">
-              <MapExplorer />
-            </Route>
-            <ProtectedRoute path="/bookings" component={MyBookingsPage} />
-            <ProtectedRoute path="/profile" component={ProfilePage} />
-            <Route>
-              <NotFound />
-            </Route>
-          </Switch>
-          <Toaster />
-        </BookingProvider>
-      </AuthProvider>
-    </LanguageProvider>
+    <div className="app">
+      <LanguageProvider>
+        <AuthProvider>
+          <BookingProvider>
+            <Switch>
+              <Route path="/auth">
+                <AuthPage />
+              </Route>
+              <Route path="/">
+                <HomePage />
+              </Route>
+              <Route path="/salon/:id">
+                <SalonDetailsPage />
+              </Route>
+              <Route path="/map">
+                <MapExplorer />
+              </Route>
+              <ProtectedRoute path="/bookings" component={MyBookingsPage} />
+              <ProtectedRoute path="/profile" component={ProfilePage} />
+              <Route>
+                <NotFound />
+              </Route>
+            </Switch>
+            <Toaster />
+          </BookingProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </div>
   );
 }
 
