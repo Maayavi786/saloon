@@ -45,13 +45,16 @@ export function AIRecommendations({ salonId, limit = 3, showReasons = true }: AI
 
       try {
         setLoading(true);
-        let url = "/api/services/recommendations";
+        // Construct the correct URL with query parameters
+        const params = new URLSearchParams();
         if (salonId) {
-          url += `?salonId=${salonId}`;
+          params.append('salonId', salonId.toString());
         }
         if (limit) {
-          url += `${salonId ? "&" : "?"}limit=${limit}`;
+          params.append('limit', limit.toString());
         }
+        
+        const url = `/api/recommendations${params.toString() ? `?${params.toString()}` : ''}`;
 
         const res = await apiRequest("GET", url);
         if (!res.ok) {

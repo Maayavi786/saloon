@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/use-language";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
@@ -34,11 +34,12 @@ export default function AuthPage() {
   const [, navigate] = useLocation();
   const isArabic = language === "ar";
   
-  // Redirect if already logged in
-  if (user) {
-    navigate("/");
-    return null;
-  }
+  // Use useEffect for navigation instead of redirecting during render
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
   
   // Login schema
   const loginSchema = z.object({

@@ -105,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // AI Recommendation API
-  app.get("/api/services/recommendations", async (req, res) => {
+  app.get("/api/recommendations", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "يجب تسجيل الدخول" });
     }
