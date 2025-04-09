@@ -1,111 +1,75 @@
-
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { useLanguage } from '../hooks/useLanguage';
+import { View, FlatList, StyleSheet, Text } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
+import { useLanguage } from '../hooks/useLanguage';
 import { Review } from '@shared/schema';
-import { Text } from '../components/ui/Text';
-import { Card } from '../components/ui/Card';
-import { Star, MessageCircle } from 'lucide-react-native';
 
 export default function ReviewsScreen() {
   const { language } = useLanguage();
   const isArabic = language === 'ar';
+  const { data: reviews } = useQuery<Review[]>({ queryKey: ['/api/reviews'] });
 
-  const { data: reviews } = useQuery<Review[]>(['salon-reviews']);
+  const renderReview = ({ item }: { item: Review }) => (
+    <View style={styles.reviewCard}>
+      <View style={styles.header}>
+        <Text style={styles.userName}>{item.userName}</Text>
+        <Text style={styles.rating}>★ {item.rating}</Text>
+      </View>
+      <Text style={styles.comment}>{item.comment}</Text>
+      <Text style={styles.date}>{new Date(item.date).toLocaleDateString()}</Text>
+    </View>
+  );
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.statsCard}>
-        <Text style={styles.statsTitle}>
-          {isArabic ? 'إحصائيات التقييمات' : 'Review Statistics'}
-        </Text>
-        <View style={styles.statsRow}>
-          <Star size={24} color="#FFD700" />
-          <Text style={styles.statsText}>
-            {reviews?.reduce((acc, review) => acc + review.rating, 0) / (reviews?.length || 1)}
-          </Text>
-        </View>
-        <Text style={styles.totalReviews}>
-          {isArabic ? `${reviews?.length} تقييم` : `${reviews?.length} Reviews`}
-        </Text>
-      </View>
-
-      {reviews?.map((review) => (
-        <Card key={review.id} style={styles.reviewCard}>
-          <View style={styles.reviewHeader}>
-            <Text style={styles.reviewerName}>{review.userName}</Text>
-            <View style={styles.ratingContainer}>
-              <Star size={16} color="#FFD700" />
-              <Text style={styles.rating}>{review.rating}</Text>
-            </View>
-          </View>
-          <Text style={styles.reviewText}>{review.comment}</Text>
-          <Text style={styles.reviewDate}>
-            {new Date(review.createdAt).toLocaleDateString()}
-          </Text>
-        </Card>
-      ))}
-    </ScrollView>
+    <View style={styles.container}>
+      <Text style={styles.title}>
+        {isArabic ? 'التقييمات' : 'Reviews'}
+      </Text>
+      <FlatList
+        data={reviews}
+        renderItem={renderReview}
+        keyExtractor={(item) => item.id.toString()}
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
     padding: 16,
-  },
-  statsCard: {
     backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
   },
-  statsTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 8,
-  },
-  statsText: {
+  title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  totalReviews: {
-    color: '#666',
-    marginTop: 4,
+    marginBottom: 16,
   },
   reviewCard: {
     padding: 16,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
     marginBottom: 12,
   },
-  reviewHeader: {
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 8,
   },
-  reviewerName: {
-    fontWeight: 'bold',
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  userName: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   rating: {
-    marginLeft: 4,
+    fontSize: 16,
+    color: '#FFB800',
   },
-  reviewText: {
-    marginVertical: 8,
+  comment: {
+    fontSize: 14,
+    marginBottom: 8,
   },
-  reviewDate: {
-    color: '#666',
+  date: {
     fontSize: 12,
+    color: '#666',
   },
 });
