@@ -105,13 +105,13 @@ One-Click Booking: Simplifies the booking process with a single click.
 At-Home Services: Supports booking services at the customer's location.
 Real-time Tracking: Enables tracking of service providers for at-home services.
 Flexible Booking: Offers flexible scheduling options.
-✅ 3D Interactive Islamic Geometric Animations (Next-Gen UI)
-✅ AI-Powered Hair & Makeup Try-On (AR Filters)
-✅ Real-Time Hijab-Friendly Salon Finder (Ladies-Only Salons)
-✅ AI Chatbot for Beauty Advice in Arabic
-✅ Biometric Face Scan for Secure VIP Access
-✅ Augmented Reality (AR) View of Salon Interiors
-✅ Dynamic Pricing Based on Demand (Surge Pricing Like Uber)
+3D Interactive Islamic Geometric Animations (Next-Gen UI)
+AI-Powered Hair & Makeup Try-On (AR Filters)
+Real-Time Hijab-Friendly Salon Finder (Ladies-Only Salons)
+AI Chatbot for Beauty Advice in Arabic
+Biometric Face Scan for Secure VIP Access
+Augmented Reality (AR) View of Salon Interiors
+Dynamic Pricing Based on Demand (Surge Pricing Like Uber)
 Final Recommendations (Key Focus Areas)
 Personalized Discovery: Tailored search and discovery experience.
 Dynamic Pricing & Loyalty: Strategic use of pricing and loyalty programs.
