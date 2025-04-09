@@ -9,7 +9,9 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 // Make sure to call loadStripe outside of a component's render to avoid recreating the Stripe object
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = import.meta.env.VITE_STRIPE_PUBLIC_KEY 
+  ? loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
+  : null;
 
 // The checkout form component that collects payment details
 const CheckoutForm = ({ 
@@ -217,6 +219,22 @@ export function PaymentForm({
         <CardHeader>
           <CardTitle>{language === 'ar' ? 'حدث خطأ' : 'Error'}</CardTitle>
           <CardDescription>{error}</CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <Button onClick={onCancel} className="w-full">
+            {language === 'ar' ? 'العودة' : 'Go Back'}
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+
+  if (!stripePromise) {
+    return (
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>{language === 'ar' ? 'خطأ في التكوين' : 'Configuration Error'}</CardTitle>
+          <CardDescription>{language === 'ar' ? 'لم يتم تكوين بوابة الدفع بشكل صحيح' : 'Payment gateway is not properly configured'}</CardDescription>
         </CardHeader>
         <CardFooter>
           <Button onClick={onCancel} className="w-full">
