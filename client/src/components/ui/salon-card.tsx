@@ -18,7 +18,7 @@ export function SalonCard({ salon, layout = "list", distance }: SalonCardProps) 
   
   if (layout === "grid") {
     return (
-      <div className="w-64 flex-shrink-0 bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="w-64 flex-shrink-0 bg-white rounded-xl shadow-sm overflow-hidden card-hover">
         <Link href={`/salon/${salon.id}`}>
           <div className="relative">
             <img 
