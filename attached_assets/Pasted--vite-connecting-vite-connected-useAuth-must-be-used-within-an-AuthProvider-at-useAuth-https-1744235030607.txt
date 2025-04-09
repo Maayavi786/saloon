@@ -1,0 +1,39 @@
+[vite] connecting...
+[vite] connected.
+useAuth must be used within an AuthProvider
+at useAuth (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/src/hooks/use-auth.tsx:134:11)
+at HomePage (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/src/pages/home-page.tsx:35:20)
+at renderWithHooks (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:11548:26)
+at mountIndeterminateComponent (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:14926:21)
+at beginWork (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:15914:22)
+at HTMLUnknownElement.callCallback2 (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:3674:22)
+at Object.invokeGuardedCallbackDev (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:3699:24)
+at invokeGuardedCallback (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:3733:39)
+at beginWork$1 (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:19765:15)
+at performUnitOfWork (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:19198:20)
+useAuth must be used within an AuthProvider
+at useAuth (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/src/hooks/use-auth.tsx:134:11)
+at HomePage (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/src/pages/home-page.tsx:35:20)
+at renderWithHooks (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:11548:26)
+at mountIndeterminateComponent (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:14926:21)
+at beginWork (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:15914:22)
+at HTMLUnknownElement.callCallback2 (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:3674:22)
+at Object.invokeGuardedCallbackDev (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:3699:24)
+at invokeGuardedCallback (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:3733:39)
+at beginWork$1 (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:19765:15)
+at performUnitOfWork (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=bc51b9b5:19198:20)
+The above error occurred in the <HomePage> component:
+
+    at HomePage (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/src/pages/home-page.tsx:34:24)
+    at RenderedRoute (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=bc51b9b5:5887:26)
+    at Routes (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=bc51b9b5:6618:3)
+    at Router (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=bc51b9b5:6561:13)
+    at BrowserRouter (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/react-router-dom.js?v=bc51b9b5:8813:3)
+    at LanguageProvider (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/src/hooks/use-language.tsx:20:36)
+    at App
+    at LanguageProvider (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/src/hooks/use-language.tsx?v=fYMiC_jJV75cYf-lSxJwK:20:36)
+    at AuthProvider (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/src/hooks/use-auth.tsx?v=fYMiC_jJV75cYf-lSxJwK:27:32)
+    at QueryClientProvider (https://387938df-9d12-4860-9663-701d28a5e60e-00-3g1b7ne4o0wgv.pike.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=bc51b9b5:2805:3)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
