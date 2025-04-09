@@ -48,7 +48,10 @@ export default function HomePage() {
       <Header />
       
       <main className="container mx-auto px-4 py-6">
-        {/* Tab Navigation */}
+        <h1 className="text-2xl font-bold text-center mb-6">
+        {isArabic ? 'حجز خدمات الصالون' : 'Salon Services Booking'}
+      </h1>
+      {/* Tab Navigation */}
         <div className="grid grid-cols-2 mb-6 bg-white rounded-xl shadow-sm overflow-hidden">
           <button 
             onClick={() => setActiveTab("female")}
