@@ -2,6 +2,7 @@ import { pgTable, text, serial, integer, boolean, timestamp, real, json } from "
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Existing tables with enhancements
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
@@ -10,19 +11,47 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   phoneNumber: text("phone_number").notNull(),
   role: text("role").notNull().default("customer"),
-  gender: text("gender"), // male, female, other
-  city: text("city"), // User's city for location-based recommendations
-  preferences: text("preferences"), // comma-separated: female_only, male_only, private_rooms, etc.
+  gender: text("gender"),
+  city: text("city"),
+  preferences: text("preferences"),
   profileImage: text("profile_image"),
-  privacySettings: json("privacy_settings"), // JSON for detailed privacy configuration
-  loyaltyPoints: integer("loyalty_points").default(0), // For loyalty program
-  membershipType: text("membership_type").default("standard"), // standard, premium, vip
-  notificationPreferences: json("notification_preferences"), // Email, SMS, push notification preferences
-  savedAddresses: json("saved_addresses"), // For at-home services
+  privacySettings: json("privacy_settings"),
+  loyaltyPoints: integer("loyalty_points").default(0),
+  membershipType: text("membership_type").default("standard"),
+  notificationPreferences: json("notification_preferences"),
+  savedAddresses: json("saved_addresses"),
   createdAt: timestamp("created_at").defaultNow(),
   lastLoginAt: timestamp("last_login_at"),
+  deviceTokens: json("device_tokens"), // For push notifications
+  language: text("language").default("ar"),
+  verificationStatus: text("verification_status").default("unverified"),
+  documentsUrls: json("documents_urls"), // For ID verification
 });
 
+export const devices = pgTable("devices", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  deviceId: text("device_id").notNull(),
+  platform: text("platform").notNull(), // ios, android, web
+  pushToken: text("push_token"),
+  lastActive: timestamp("last_active").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  type: text("type").notNull(), // booking, promotion, system
+  title: text("title").notNull(),
+  titleEn: text("title_en"),
+  message: text("message").notNull(),
+  messageEn: text("message_en"),
+  data: json("data"),
+  isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Enhanced existing tables
 export const salons = pgTable("salons", {
   id: serial("id").primaryKey(),
   ownerId: integer("owner_id").notNull().references(() => users.id),
@@ -42,7 +71,7 @@ export const salons = pgTable("salons", {
   coverImage: text("cover_image"),
   images: json("images"), // Array of image URLs
   gender: text("gender").notNull(), // female_only, male_only, both
-  amenities: text("amenities"), // Comma-separated: wifi, parking, coffee, etc.
+  amenities: json("amenities"), // Comma-separated: wifi, parking, coffee, etc.
   categories: text("categories"), // Comma-separated categories offered
   hasPrivateRooms: boolean("has_private_rooms").default(false),
   hasLadiesSection: boolean("has_ladies_section").default(false),
@@ -59,6 +88,18 @@ export const salons = pgTable("salons", {
   avgWaitTime: integer("avg_wait_time"), // Average wait time in minutes
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at"),
+  avgRating: real("avg_rating").default(0),
+  totalReviews: integer("total_reviews").default(0),
+  businessLicense: text("business_license"),
+  licenseExpiry: timestamp("license_expiry"),
+  bankDetails: json("bank_details"),
+  workingHours: json("working_hours").notNull(),
+  breakTimes: json("break_times"),
+  specialHours: json("special_hours"), // For Ramadan, holidays etc
+  cancellationPolicy: json("cancellation_policy"),
+  salonPhotos: json("salon_photos"),
+  certifications: json("certifications"),
+  insuranceInfo: json("insurance_info"),
 });
 
 export const services = pgTable("services", {
@@ -85,6 +126,13 @@ export const services = pgTable("services", {
   dynamicPricing: json("dynamic_pricing"), // Rules for dynamic pricing
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at"),
+  prerequisites: json("prerequisites"),
+  aftercare: json("aftercare"),
+  availableStaff: json("available_staff"),
+  packages: json("packages"), // For service bundles
+  seasonalAvailability: json("seasonal_availability"),
+  preparationTime: integer("preparation_time"),
+  cleanupTime: integer("cleanup_time"),
 });
 
 export const bookings = pgTable("bookings", {
@@ -114,6 +162,12 @@ export const bookings = pgTable("bookings", {
   isAnonymous: boolean("is_anonymous").default(false), // For privacy
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at"),
+  paymentDetails: json("payment_details"),
+  cancellationReason: text("cancellation_reason"),
+  rescheduleCount: integer("reschedule_count").default(0),
+  checklist: json("checklist"), // Pre-service requirements
+  specialRequests: text("special_requests"),
+  feedbackRequired: boolean("feedback_required").default(true),
 });
 
 export const reviews = pgTable("reviews", {
@@ -209,12 +263,50 @@ export const paymentTransactions = pgTable("payment_transactions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// New tables for enhanced features
+export const appointments = pgTable("appointments", {
+  id: serial("id").primaryKey(),
+  salonId: integer("salon_id").notNull().references(() => salons.id),
+  staffId: integer("staff_id").references(() => staff.id),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  status: text("status").notNull(), // available, booked, blocked
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const customerPreferences = pgTable("customer_preferences", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  preferredSalons: json("preferred_salons"),
+  preferredStaff: json("preferred_staff"),
+  preferredServices: json("preferred_services"),
+  specialNeeds: json("special_needs"),
+  allergies: json("allergies"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const giftCards = pgTable("gift_cards", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  amount: real("amount").notNull(),
+  balance: real("balance").notNull(),
+  expiryDate: timestamp("expiry_date"),
+  status: text("status").default("active"),
+  purchaserId: integer("purchaser_id").references(() => users.id),
+  recipientId: integer("recipient_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
   createdAt: true,
   lastLoginAt: true,
   loyaltyPoints: true,
+  deviceTokens: true,
+  language: true,
+  verificationStatus: true,
+  documentsUrls: true,
 });
 
 export const insertSalonSchema = createInsertSchema(salons).omit({
@@ -224,6 +316,8 @@ export const insertSalonSchema = createInsertSchema(salons).omit({
   rating: true,
   reviewCount: true,
   avgWaitTime: true,
+  avgRating: true,
+  totalReviews: true,
 });
 
 export const insertServiceSchema = createInsertSchema(services).omit({
@@ -276,6 +370,35 @@ export const insertPaymentTransactionSchema = createInsertSchema(paymentTransact
   errorMessage: true,
 });
 
+export const insertDeviceSchema = createInsertSchema(devices).omit({
+  id: true,
+  createdAt: true,
+  lastActive: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+  isRead: true,
+});
+
+export const insertAppointmentSchema = createInsertSchema(appointments).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertCustomerPreferenceSchema = createInsertSchema(customerPreferences).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertGiftCardSchema = createInsertSchema(giftCards).omit({
+  id: true,
+  createdAt: true,
+  balance: true,
+});
+
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertSalon = z.infer<typeof insertSalonSchema>;
@@ -286,6 +409,11 @@ export type InsertStaff = z.infer<typeof insertStaffSchema>;
 export type InsertPromotion = z.infer<typeof insertPromotionSchema>;
 export type InsertMembershipTier = z.infer<typeof insertMembershipTierSchema>;
 export type InsertPaymentTransaction = z.infer<typeof insertPaymentTransactionSchema>;
+export type InsertDevice = z.infer<typeof insertDeviceSchema>;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
+export type InsertCustomerPreference = z.infer<typeof insertCustomerPreferenceSchema>;
+export type InsertGiftCard = z.infer<typeof insertGiftCardSchema>;
 
 export type User = typeof users.$inferSelect;
 export type Salon = typeof salons.$inferSelect;
@@ -296,6 +424,11 @@ export type Staff = typeof staff.$inferSelect;
 export type Promotion = typeof promotions.$inferSelect;
 export type MembershipTier = typeof membershipTiers.$inferSelect;
 export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+export type Device = typeof devices.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
+export type Appointment = typeof appointments.$inferSelect;
+export type CustomerPreference = typeof customerPreferences.$inferSelect;
+export type GiftCard = typeof giftCards.$inferSelect;
 
 // Additional schemas for login
 export const loginSchema = z.object({
