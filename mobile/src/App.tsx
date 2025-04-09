@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -17,6 +16,13 @@ import AddServiceScreen from './screens/AddServiceScreen';
 import ManageStaffScreen from './screens/ManageStaffScreen';
 import SalonSettingsScreen from './screens/SalonSettingsScreen';
 import BookingConfirmationScreen from './screens/BookingConfirmationScreen';
+import EditServiceScreen from './screens/EditServiceScreen'; // Added
+import AddStaffScreen from './screens/AddStaffScreen';     // Added
+import EditStaffScreen from './screens/EditStaffScreen';   // Added
+import ManageServicesScreen from './screens/ManageServicesScreen'; // Added
+import ReviewsScreen from './screens/ReviewsScreen'; // Added
+import NotificationsScreen from './screens/NotificationsScreen'; //Added
+
 
 const Stack = createNativeStackNavigator();
 const queryClient = new QueryClient();
@@ -34,26 +40,14 @@ export default function App() {
                 <Stack.Screen name="Bookings" component={BookingsScreen} />
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen name="Auth" component={AuthScreen} />
-                <Stack.Screen 
-                  name="ManageServices" 
-                  component={ManageServicesScreen}
-                  options={{ title: language === 'ar' ? 'إدارة الخدمات' : 'Manage Services' }}
-                />
-                <Stack.Screen 
-                  name="ManageStaff" 
-                  component={ManageStaffScreen}
-                  options={{ title: language === 'ar' ? 'إدارة الموظفين' : 'Manage Staff' }}
-                />
-                <Stack.Screen 
-                  name="Reviews" 
-                  component={ReviewsScreen}
-                  options={{ title: language === 'ar' ? 'التقييمات' : 'Reviews' }}
-                />
-                <Stack.Screen 
-                  name="Notifications" 
-                  component={NotificationsScreen}
-                  options={{ title: language === 'ar' ? 'الإشعارات' : 'Notifications' }}
-                />
+                <Stack.Screen name="AddService" component={AddServiceScreen} />
+                <Stack.Screen name="EditService" component={EditServiceScreen} />
+                <Stack.Screen name="AddStaff" component={AddStaffScreen} />
+                <Stack.Screen name="EditStaff" component={EditStaffScreen} />
+                <Stack.Screen name="ManageServices" component={ManageServicesScreen} />
+                <Stack.Screen name="ManageStaff" component={ManageStaffScreen} />
+                <Stack.Screen name="Reviews" component={ReviewsScreen} />
+                <Stack.Screen name="Notifications" component={NotificationsScreen} />
                 <Stack.Screen 
                   name="BookingFlow" 
                   component={BookingFlowScreen}
@@ -63,16 +57,6 @@ export default function App() {
                   name="SalonManagement" 
                   component={SalonManagementScreen}
                   options={{ title: language === 'ar' ? 'إدارة الصالون' : 'Salon Management' }}
-                />
-                <Stack.Screen 
-                  name="AddService" 
-                  component={AddServiceScreen}
-                  options={{ title: language === 'ar' ? 'إضافة خدمة' : 'Add Service' }}
-                />
-                <Stack.Screen 
-                  name="ManageStaff" 
-                  component={ManageStaffScreen}
-                  options={{ title: language === 'ar' ? 'إدارة الموظفين' : 'Manage Staff' }}
                 />
                 <Stack.Screen 
                   name="SalonSettings" 
