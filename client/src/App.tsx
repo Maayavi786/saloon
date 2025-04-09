@@ -1,48 +1,40 @@
-import { Switch, Route } from "wouter";
-import NotFound from "@/pages/not-found";
-import HomePage from "@/pages/home-page";
-import AuthPage from "@/pages/auth-page";
-import SalonDetailsPage from "@/pages/salon-details-page";
-import MyBookingsPage from "@/pages/my-bookings-page";
-import ProfilePage from "@/pages/profile-page";
-import MapExplorer from "@/pages/map-explorer";
-import { ProtectedRoute } from "./lib/protected-route";
-import { LanguageProvider } from "@/hooks/use-language";
-import { AuthProvider } from "@/hooks/use-auth";
-import { BookingProvider } from "@/contexts/booking-context";
-import { Toaster } from "@/components/ui/toaster";
 
-function App() {
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/home-page";
+import AuthPage from "./pages/auth-page";
+import SalonDetailsPage from "./pages/salon-details-page";
+import ProfilePage from "./pages/profile-page";
+import MyBookingsPage from "./pages/my-bookings-page";
+import MapExplorer from "./pages/map-explorer";
+import NotFound from "./pages/not-found";
+import ProtectedRoute from "./lib/protected-route";
+
+export default function App() {
   return (
-    <div className="app">
-      <LanguageProvider>
-        <AuthProvider>
-          <BookingProvider>
-            <Switch>
-              <Route path="/auth">
-                <AuthPage />
-              </Route>
-              <Route path="/">
-                <HomePage />
-              </Route>
-              <Route path="/salon/:id">
-                <SalonDetailsPage />
-              </Route>
-              <Route path="/map">
-                <MapExplorer />
-              </Route>
-              <ProtectedRoute path="/bookings" component={MyBookingsPage} />
-              <ProtectedRoute path="/profile" component={ProfilePage} />
-              <Route>
-                <NotFound />
-              </Route>
-            </Switch>
-            <Toaster />
-          </BookingProvider>
-        </AuthProvider>
-      </LanguageProvider>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/salon/:id" element={<SalonDetailsPage />} />
+        <Route 
+          path="/profile" 
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/bookings" 
+          element={
+            <ProtectedRoute>
+              <MyBookingsPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="/map" element={<MapExplorer />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Router>
   );
 }
-
-export default App;
