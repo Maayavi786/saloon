@@ -16,25 +16,29 @@ import ProfilePage from '@/pages/profile-page';
 import NotFound from '@/pages/not-found';
 import ProtectedRoute from '@/lib/protected-route';
 
+import { BookingProvider } from "@/contexts/booking-context";
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <LanguageProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/map" element={<MapExplorer />} />
-              <Route path="/salon/:id" element={<SalonDetailsPage />} />
-              <Route element={<ProtectedRoute />}>
-                <Route path="/bookings" element={<MyBookingsPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-          </BrowserRouter>
+          <BookingProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/map" element={<MapExplorer />} />
+                <Route path="/salon/:id" element={<SalonDetailsPage />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/bookings" element={<MyBookingsPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+            </BrowserRouter>
+          </BookingProvider>
         </LanguageProvider>
       </AuthProvider>
     </QueryClientProvider>

@@ -1,5 +1,6 @@
-import { createContext, ReactNode, useContext, useState } from "react";
-import { Service } from "@shared/schema";
+
+import React, { createContext, useContext, useState } from 'react';
+import { Service } from '@shared/schema';
 
 interface BookingContextType {
   selectedService: Service | null;
@@ -10,31 +11,27 @@ interface BookingContextType {
 
 const BookingContext = createContext<BookingContextType | undefined>(undefined);
 
-export function BookingProvider({ children }: { children: ReactNode }) {
+export function BookingProvider({ children }: { children: React.ReactNode }) {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  
+
   const openBookingModal = (service: Service) => {
     setSelectedService(service);
     setIsBookingModalOpen(true);
   };
-  
+
   const closeBookingModal = () => {
     setIsBookingModalOpen(false);
-    setTimeout(() => {
-      setSelectedService(null);
-    }, 300); // Clear service after animation completes
+    setSelectedService(null);
   };
-  
+
   return (
-    <BookingContext.Provider
-      value={{
-        selectedService,
-        isBookingModalOpen,
-        openBookingModal,
-        closeBookingModal,
-      }}
-    >
+    <BookingContext.Provider value={{
+      selectedService,
+      isBookingModalOpen,
+      openBookingModal,
+      closeBookingModal,
+    }}>
       {children}
     </BookingContext.Provider>
   );
@@ -42,8 +39,8 @@ export function BookingProvider({ children }: { children: ReactNode }) {
 
 export function useBooking() {
   const context = useContext(BookingContext);
-  if (!context) {
-    throw new Error("useBooking must be used within a BookingProvider");
+  if (context === undefined) {
+    throw new Error('useBooking must be used within a BookingProvider');
   }
   return context;
 }
