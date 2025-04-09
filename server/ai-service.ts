@@ -2,9 +2,16 @@ import OpenAI from "openai";
 import { Service, User, Booking } from "@shared/schema";
 
 // Initialize OpenAI with API key
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI | null = null;
+try {
+  if (process.env.OPENAI_API_KEY) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+} catch (error) {
+  console.log('OpenAI client not configured');
+}
 
 // Structure for recommendation request
 interface RecommendationRequest {
@@ -78,51 +85,61 @@ ${city ? `- Consider user location: ${city}` : ""}
     const userQuery = `Please recommend ${limit} salon services for this user. For each recommendation, include the service ID, service name, a score from 0 to 100 indicating relevance, and a brief reason for the recommendation.`;
 
     let recommendations: ServiceRecommendation[] = [];
-    
+
     try {
       // Make API call to OpenAI
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userInfo + servicesInfo + constraints + userQuery }
-        ],
-        response_format: { type: "json_object" }
-      });
+      if (openai) {
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userInfo + servicesInfo + constraints + userQuery }
+          ],
+          response_format: { type: "json_object" }
+        });
 
-      // Parse the response
-      const content = response.choices[0].message.content;
-      if (!content) {
-        throw new Error("No content in the AI response");
-      }
-      
-      try {
-        const parsed = JSON.parse(content);
-        if (parsed.recommendations && Array.isArray(parsed.recommendations)) {
-          recommendations = parsed.recommendations.map((rec: any) => ({
-            serviceId: parseInt(rec.serviceId),
-            serviceName: rec.serviceName,
-            score: parseInt(rec.score),
-            reason: rec.reason
-          }));
-        } else {
-          // Alternative parsing if the structure is different
-          recommendations = Object.values(parsed).filter(item => 
-            typeof item === 'object' && item !== null && 'serviceId' in item
-          ).map((rec: any) => ({
-            serviceId: parseInt(rec.serviceId),
-            serviceName: rec.serviceName,
-            score: parseInt(rec.score),
-            reason: rec.reason
-          }));
+        // Parse the response
+        const content = response.choices[0].message.content;
+        if (!content) {
+          throw new Error("No content in the AI response");
         }
-      } catch (err) {
-        console.error("Error parsing AI recommendations:", err);
-        throw new Error("Failed to parse AI recommendations");
+
+        try {
+          const parsed = JSON.parse(content);
+          if (parsed.recommendations && Array.isArray(parsed.recommendations)) {
+            recommendations = parsed.recommendations.map((rec: any) => ({
+              serviceId: parseInt(rec.serviceId),
+              serviceName: rec.serviceName,
+              score: parseInt(rec.score),
+              reason: rec.reason
+            }));
+          } else {
+            // Alternative parsing if the structure is different
+            recommendations = Object.values(parsed).filter(item => 
+              typeof item === 'object' && item !== null && 'serviceId' in item
+            ).map((rec: any) => ({
+              serviceId: parseInt(rec.serviceId),
+              serviceName: rec.serviceName,
+              score: parseInt(rec.score),
+              reason: rec.reason
+            }));
+          }
+        } catch (err) {
+          console.error("Error parsing AI recommendations:", err);
+          throw new Error("Failed to parse AI recommendations");
+        }
+      } else {
+        console.warn("OpenAI API key not set, using fallback recommendations.");
+        recommendations = availableServices.slice(0, limit).map(service => ({
+          serviceId: service.id,
+          serviceName: service.nameEn || service.name,
+          score: 90 - (availableServices.indexOf(service) * 10),
+          reason: "Based on your preferences and popular services in your area"
+        }));
       }
     } catch (error) {
-      console.error("OpenAI API error, using fallback recommendations:", error);
-      
+      console.error("Error getting AI recommendations:", error);
+
       // Use fallback recommendations based on available services
       recommendations = availableServices.slice(0, limit).map(service => ({
         serviceId: service.id,
@@ -152,7 +169,7 @@ export async function generateWelcomeMessage(
   try {
     // Check if user prefers Arabic language
     const prefersArabic = user.preferences?.includes("arabic") || false;
-    
+
     const systemPrompt = `You are a welcoming virtual assistant for a salon booking app in Saudi Arabia.
 Generate a personalized welcome message for the user that is warm, culturally appropriate, and mentions recommended services.
 ${prefersArabic ? "The message should be in Arabic." : "The message should be in English."}
@@ -164,16 +181,21 @@ Gender: ${user.gender || "Not specified"}
 Recommendations: ${recommendations.map(r => r.serviceName).join(", ")}
 `;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userInfo }
-      ],
-      max_tokens: 150
-    });
-
-    return response.choices[0].message.content || "Welcome to our salon app!";
+    if (openai) {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userInfo }
+        ],
+        max_tokens: 150
+      });
+      return response.choices[0].message.content || "Welcome to our salon app!";
+    } else {
+      return user.preferences?.includes("arabic")
+        ? "أهلاً بك في تطبيق الصالون!" 
+        : "Welcome to our salon app!";
+    }
   } catch (error: any) {
     console.error("Error generating welcome message:", error);
     return user.preferences?.includes("arabic")
@@ -193,7 +215,7 @@ export async function suggestAppointmentTimes(
     const dayOfWeek = new Date().getDay();
     const isWeekend = dayOfWeek === 5 || dayOfWeek === 6; // Friday or Saturday in Saudi Arabia
     const prefersArabic = user.preferences?.includes("arabic") || false;
-    
+
     const systemPrompt = `You are a scheduling assistant for a salon in Saudi Arabia.
 Suggest 3 appropriate appointment times for a user booking a salon service.
 Consider the time of day, day of week, and cultural norms in Saudi Arabia.
@@ -206,38 +228,40 @@ Service duration: ${service.duration} minutes
 User gender: ${user.gender || "Not specified"}
 `;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userInfo }
-      ],
-      response_format: { type: "json_object" }
-    });
+    if (openai) {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userInfo }
+        ],
+        response_format: { type: "json_object" }
+      });
 
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error("No content in the AI response");
-    }
-
-    try {
-      const parsed = JSON.parse(content);
-      if (parsed.times && Array.isArray(parsed.times)) {
-        return parsed.times;
-      } else if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
-        return parsed.suggestions;
-      } else {
-        // Try to extract any array from the response
-        const anyArray = Object.values(parsed).find(item => Array.isArray(item));
-        if (anyArray) return anyArray as string[];
+      const content = response.choices[0].message.content;
+      if (!content) {
+        throw new Error("No content in the AI response");
       }
-    } catch (error) {
-      console.error("Error parsing suggested times:", error);
+
+      try {
+        const parsed = JSON.parse(content);
+        if (parsed.times && Array.isArray(parsed.times)) {
+          return parsed.times;
+        } else if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
+          return parsed.suggestions;
+        } else {
+          // Try to extract any array from the response
+          const anyArray = Object.values(parsed).find(item => Array.isArray(item));
+          if (anyArray) return anyArray as string[];
+        }
+      } catch (error) {
+        console.error("Error parsing suggested times:", error);
+      }
     }
 
-    // Default times if parsing fails
+    // Default times if parsing fails or openai is null
     return ["10:00 AM", "02:00 PM", "05:30 PM"];
-    
+
   } catch (error: any) {
     console.error("Error suggesting appointment times:", error);
     return ["10:00 AM", "02:00 PM", "05:30 PM"];
