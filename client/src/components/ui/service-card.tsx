@@ -12,14 +12,14 @@ export function ServiceCard({ service, layout = "list" }: ServiceCardProps) {
   const { language } = useLanguage();
   const { openBookingModal } = useBooking();
   const isArabic = language === "ar";
-  
+
   const handleBookClick = () => {
     openBookingModal(service);
   };
-  
+
   if (layout === "featured") {
     return (
-      <div className="w-64 flex-shrink-0 bg-white rounded-xl border border-neutral-200 overflow-hidden">
+      <div className="w-64 flex-shrink-0 bg-white rounded-xl border border-neutral-200 overflow-hidden hover:shadow-lg transition-all duration-200 border-saudi-gold/20 bg-white/90 backdrop-blur-sm"> {/* Change applied here */}
         <div className="p-3">
           <h3 className="font-bold mb-1">
             {isArabic ? service.name : service.nameEn || service.name}
@@ -49,7 +49,7 @@ export function ServiceCard({ service, layout = "list" }: ServiceCardProps) {
       </div>
     );
   }
-  
+
   return (
     <div className="bg-white rounded-xl border border-neutral-200 p-3 mb-3">
       <div className="flex justify-between items-start">

@@ -12,10 +12,10 @@ interface SalonCardProps {
 export function SalonCard({ salon, layout = "list", distance }: SalonCardProps) {
   const { language } = useLanguage();
   const isArabic = language === "ar";
-  
+
   // Handle missing images with a placeholder
   const coverImage = salon.coverImage || "https://images.unsplash.com/photo-1470259078422-826894b933aa?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=240&q=80";
-  
+
   if (layout === "grid") {
     return (
       <div className="w-64 flex-shrink-0 bg-white rounded-xl shadow-sm overflow-hidden card-hover">
@@ -66,9 +66,9 @@ export function SalonCard({ salon, layout = "list", distance }: SalonCardProps) 
       </div>
     );
   }
-  
+
   return (
-    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-4">
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-4 border-saudi-green/10 bg-white/95 backdrop-blur-sm"> {/* This line is modified */}
       <Link href={`/salon/${salon.id}`}>
         <div className="flex">
           <div className="relative w-24 h-24">

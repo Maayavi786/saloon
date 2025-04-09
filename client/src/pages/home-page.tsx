@@ -43,7 +43,7 @@ export default function HomePage() {
   });
   
   return (
-    <div className="bg-neutral-100 min-h-screen pb-20">
+    <div className="bg-saudi-sand min-h-screen pb-20">
       <LanguageSwitcher />
       <Header />
       
@@ -54,7 +54,7 @@ export default function HomePage() {
             onClick={() => setActiveTab("female")}
             className={`py-3 text-center border-b-2 ${
               activeTab === "female" 
-                ? "border-primary font-medium text-primary" 
+                ? "border-saudi-green font-medium text-saudi-green bg-saudi-sand/50" 
                 : "border-transparent font-medium text-neutral-700"
             }`}
           >

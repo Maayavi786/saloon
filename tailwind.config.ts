@@ -13,6 +13,12 @@ export default {
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        saudi: {
+          green: "#006C35",
+          sand: "#F7EDE2",
+          gold: "#C5A572",
+          black: "#000000",
+        },
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",

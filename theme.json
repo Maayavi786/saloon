@@ -1,6 +1,9 @@
+
 {
   "variant": "tint",
-  "primary": "oklch(70% 0.1 290)",
+  "primary": "oklch(45% 0.18 125)", // Deep green like Saudi flag
+  "secondary": "oklch(93% 0.02 125)", // Light sand color
+  "accent": "oklch(85% 0.1 125)", // Gold accent
   "appearance": "light",
-  "radius": 0.5
+  "radius": 0.75
 }

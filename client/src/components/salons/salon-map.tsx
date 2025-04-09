@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Salon } from '@shared/schema';
 import { useLanguage } from '@/hooks/use-language';
 import { Card } from '@/components/ui/card';
+import { Search, SlidersHorizontal } from 'lucide-react'; // Modified import
 
 interface SalonMapProps {
   onSalonSelect?: (salon: Salon) => void;
