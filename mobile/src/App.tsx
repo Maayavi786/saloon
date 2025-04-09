@@ -35,6 +35,26 @@ export default function App() {
                 <Stack.Screen name="Profile" component={ProfileScreen} />
                 <Stack.Screen name="Auth" component={AuthScreen} />
                 <Stack.Screen 
+                  name="ManageServices" 
+                  component={ManageServicesScreen}
+                  options={{ title: language === 'ar' ? 'إدارة الخدمات' : 'Manage Services' }}
+                />
+                <Stack.Screen 
+                  name="ManageStaff" 
+                  component={ManageStaffScreen}
+                  options={{ title: language === 'ar' ? 'إدارة الموظفين' : 'Manage Staff' }}
+                />
+                <Stack.Screen 
+                  name="Reviews" 
+                  component={ReviewsScreen}
+                  options={{ title: language === 'ar' ? 'التقييمات' : 'Reviews' }}
+                />
+                <Stack.Screen 
+                  name="Notifications" 
+                  component={NotificationsScreen}
+                  options={{ title: language === 'ar' ? 'الإشعارات' : 'Notifications' }}
+                />
+                <Stack.Screen 
                   name="BookingFlow" 
                   component={BookingFlowScreen}
                   options={{ title: language === 'ar' ? 'حجز موعد' : 'Book Appointment' }}
