@@ -14,7 +14,7 @@ export default function MapExplorer() {
   const { language, isRTL } = useLanguage();
   const isMobile = useIsMobile();
   const [selectedSalonId, setSelectedSalonId] = useState<number | null>(null);
-  const [view, setView] = useState<'map' | 'list'>(isMobile ? 'list' : 'map');
+  const [view] = useState<'list'>('list');
   const [privacySettings, setPrivacySettings] = useState({
     privateRooms: false,
     femaleStaffOnly: false,

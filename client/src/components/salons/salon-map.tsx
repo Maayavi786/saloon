@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Salon } from '@shared/schema';
 import { useLanguage } from '@/hooks/use-language';
@@ -23,7 +24,7 @@ export function SalonMap({
   return (
     <Card className="w-full h-[calc(100vh-8rem)] flex items-center justify-center p-4">
       <p className="text-center text-muted-foreground">
-        {language === 'ar' ? 'تم إزالة خريطة المواقع' : 'Map view has been removed'}
+        {language === 'ar' ? 'عرض القائمة فقط' : 'List view only'}
       </p>
     </Card>
   );
