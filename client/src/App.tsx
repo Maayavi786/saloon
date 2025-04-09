@@ -38,8 +38,8 @@ export default function App() {
               </Routes>
               <Toaster />
             </BrowserRouter>
-          </BookingProvider>
-        </LanguageProvider>
+          </LanguageProvider>
+        </BookingProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
