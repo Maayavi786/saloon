@@ -1,43 +1,42 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/home-page";
-import AuthPage from "./pages/auth-page";
-import SalonDetailsPage from "./pages/salon-details-page";
-import ProfilePage from "./pages/profile-page";
-import MyBookingsPage from "./pages/my-bookings-page";
-import MapExplorer from "./pages/map-explorer";
-import NotFound from "./pages/not-found";
-import ProtectedRoute from "./lib/protected-route";
-import { LanguageProvider } from "./hooks/use-language";
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { LanguageProvider } from '@/hooks/use-language';
+import { AuthProvider } from '@/hooks/use-auth';
+import { queryClient } from '@/lib/queryClient';
+import { Toaster } from '@/components/ui/toaster';
+import HomePage from '@/pages/home-page';
+import AuthPage from '@/pages/auth-page';
+import MapExplorer from '@/pages/map-explorer';
+import SalonDetailsPage from '@/pages/salon-details-page';
+import MyBookingsPage from '@/pages/my-bookings-page';
+import ProfilePage from '@/pages/profile-page';
+import NotFound from '@/pages/not-found';
+import ProtectedRoute from '@/lib/protected-route';
 
 export default function App() {
   return (
-    <LanguageProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/auth" element={<AuthPage />} />
-          <Route path="/salon/:id" element={<SalonDetailsPage />} />
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/bookings" 
-            element={
-              <ProtectedRoute>
-                <MyBookingsPage />
-              </ProtectedRoute>
-            } 
-          />
-          <Route path="/map" element={<MapExplorer />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
-    </LanguageProvider>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <LanguageProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/map" element={<MapExplorer />} />
+              <Route path="/salon/:id" element={<SalonDetailsPage />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/bookings" element={<MyBookingsPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <Toaster />
+          </BrowserRouter>
+        </LanguageProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
