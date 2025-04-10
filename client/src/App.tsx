@@ -20,9 +20,9 @@ import { BookingProvider } from "@/contexts/booking-context";
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
           <LanguageProvider>
             <BookingProvider>
               <Routes>
@@ -39,8 +39,8 @@ export default function App() {
               <Toaster />
             </BookingProvider>
           </LanguageProvider>
-        </BrowserRouter>
-      </AuthProvider>
-    </QueryClientProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 }

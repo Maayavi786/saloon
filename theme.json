@@ -1,25 +1,9 @@
 
 {
-  "name": "saudi-elegant",
-  "cssVars": {
-    "background": "#FFFCF9",
-    "foreground": "#1A1A1A",
-    "card": "#FFFFFF",
-    "cardForeground": "#1A1A1A",
-    "popover": "#FFFFFF",
-    "popoverForeground": "#1A1A1A",
-    "primary": "#006C51",
-    "primaryForeground": "#FFFFFF",
-    "secondary": "#F8E4E8",
-    "secondaryForeground": "#1A1A1A",
-    "muted": "#F8F5F2",
-    "mutedForeground": "#64494F",
-    "accent": "#169873",
-    "accentForeground": "#FFFFFF",
-    "destructive": "#D92D20",
-    "destructiveForeground": "#FFFFFF",
-    "border": "#E6D9D0",
-    "input": "#FFFFFF",
-    "ring": "#169873"
-  }
+  "variant": "tint",
+  "primary": "oklch(45% 0.18 125)", // Deep green like Saudi flag
+  "secondary": "oklch(93% 0.02 125)", // Light sand color
+  "accent": "oklch(85% 0.1 125)", // Gold accent
+  "appearance": "light",
+  "radius": 0.75
 }
