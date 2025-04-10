@@ -7,6 +7,11 @@ import { useLanguage } from '@/hooks/use-language';
 import { apiRequest } from "@/lib/queryClient";
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { useState as useState2 } from 'react';
+import { useLanguage as useLanguage2 } from '@/hooks/use-language';
+import { Input } from '../input';
+import { Label } from '../label';
+import { cn } from '@/lib/utils';
 
 // Make sure to call loadStripe outside of a component's render to avoid recreating the Stripe object
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
@@ -253,5 +258,60 @@ export function PaymentForm({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+import { useState as useState3 } from 'react';
+import { useLanguage as useLanguage3 } from '@/hooks/use-language';
+import { Input as Input2 } from '../input';
+import { Label as Label2 } from '../label';
+import { cn as cn2 } from '@/lib/utils';
+
+export function MadaPaymentForm() {
+  const { isArabic } = useLanguage3();
+  const [cardNumber, setCardNumber] = useState3('');
+  const [expiryDate, setExpiryDate] = useState3('');
+  const [cvv, setCvv] = useState3('');
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label2>{isArabic ? 'رقم البطاقة' : 'Card Number'}</Label2>
+        <Input2
+          type="text"
+          placeholder={isArabic ? 'أدخل رقم البطاقة' : 'Enter card number'}
+          value={cardNumber}
+          onChange={(e) => setCardNumber(e.target.value.replace(/\D/g, ''))}
+          className={cn2(
+            "font-mono text-base",
+            isArabic ? "text-right" : "text-left"
+          )}
+          maxLength={16}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label2>{isArabic ? 'تاريخ الانتهاء' : 'Expiry Date'}</Label2>
+          <Input2
+            type="text"
+            placeholder="MM/YY"
+            value={expiryDate}
+            onChange={(e) => setExpiryDate(e.target.value)}
+            maxLength={5}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label2>CVV</Label2>
+          <Input2
+            type="text"
+            placeholder="123"
+            value={cvv}
+            onChange={(e) => setCvv(e.target.value.replace(/\D/g, ''))}
+            maxLength={3}
+          />
+        </div>
+      </div>
+    </div>
   );
 }
