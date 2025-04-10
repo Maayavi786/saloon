@@ -100,6 +100,11 @@ export const salons = pgTable("salons", {
   salonPhotos: json("salon_photos"),
   certifications: json("certifications"),
   insuranceInfo: json("insurance_info"),
+  prayerBreaks: boolean("prayer_breaks").default(false), // Added field
+  acceptedPayments: json("accepted_payments"), // Added field
+  priceRange: text("price_range"), // Added field
+  features: json("features") // Added field
+
 });
 
 export const services = pgTable("services", {
@@ -398,7 +403,6 @@ export const insertGiftCardSchema = createInsertSchema(giftCards).omit({
   balance: true,
 });
 
-
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type InsertSalon = z.infer<typeof insertSalonSchema>;
@@ -437,3 +441,66 @@ export const loginSchema = z.object({
 });
 
 export type LoginCredentials = z.infer<typeof loginSchema>;
+
+
+import { z } from "zod";
+
+export const salonSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  nameEn: z.string(),
+  description: z.string(),
+  descriptionEn: z.string(),
+  address: z.string(),
+  addressEn: z.string(),
+  city: z.string(),
+  cityEn: z.string(),
+  district: z.string(),
+  districtEn: z.string(),
+  phoneNumber: z.string(),
+  email: z.string().email(),
+  gender: z.enum(["female_only", "male_only", "mixed"]),
+  hasPrivateRooms: z.boolean(),
+  hasFemaleStaffOnly: z.boolean(),
+  providesHomeService: z.boolean(),
+  verified: z.boolean(),
+  prayerBreaks: z.boolean(),
+  socialMediaLinks: z.object({
+    instagram: z.string().optional(),
+    whatsapp: z.string().optional(),
+    snapchat: z.string().optional()
+  }),
+  acceptedPayments: z.array(z.enum(["mada", "applepay", "stcpay", "cash"])),
+  rating: z.number().min(0).max(5).optional(),
+  reviewCount: z.number().optional(),
+  priceRange: z.enum(["budget", "mid", "premium", "luxury"]),
+  features: z.array(z.enum([
+    "vip_lounge",
+    "prayer_room",
+    "private_rooms",
+    "waiting_area",
+    "parking",
+    "wifi"
+  ]))
+});
+
+export const serviceSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  nameEn: z.string(),
+  description: z.string(),
+  descriptionEn: z.string(),
+  price: z.number(),
+  duration: z.number(),
+  category: z.enum([
+    "hair",
+    "makeup",
+    "skincare",
+    "nails",
+    "spa",
+    "bridal",
+    "treatments"
+  ]),
+  isAvailable: z.boolean(),
+  salonId: z.number()
+});
