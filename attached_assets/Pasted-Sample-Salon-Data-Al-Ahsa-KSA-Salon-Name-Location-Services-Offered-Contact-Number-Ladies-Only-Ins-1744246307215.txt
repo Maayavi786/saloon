@@ -1,0 +1,53 @@
+Sample Salon Data (Al Ahsa, KSA)
+Salon Name	Location	Services Offered	Contact Number	Ladies-Only	Instagram Handle
+Glamour Touch Salon	Hofuf, Al Ahsa	Haircut, Makeup, Facial, Moroccan Bath, Hair Color, Nail Art	050-123-4567	Yes	@glamourtouch_ahsa
+Al Jawhara Beauty Center	Al Mubarraz	Bridal Makeup, Threading, Facial, Henna, Pedicure	053-987-6543	Yes	@aljawhara_beauty
+Maison de Beauté	Al Hofuf Central	Hair Styling, Keratin, Lash Extensions, Waxing, Microblading	055-332-1144	Yes	@maisondebeaute_ksa
+Layali Zainab Salon	Al Khalidiyah	Facial, Manicure, Bridal Packages, Hair Spa, Waxing	050-778-8899	Yes	@layali_zainab
+Bloom Lounge	Al Uqair Road	Organic Facials, Nail Extensions, Hair Color, Makeup	057-119-2288	Yes	@bloomlounge_ahsa
+Elegant Style Beauty Hub	Al Ahsa Mall Area	Balayage, Botox Hair Treatment, Eyebrow Tinting, Haircuts	059-006-7711	Yes	@elegantstyle_ksa
+Nayyara Beauty Studio	King Fahd District	Full Body Wax, Gold Facial, Hair Smoothing, Wedding Makeup	058-888-5522	Yes	@nayyara_beauty
+Lush & Blush Salon	Northern Al Ahsa	Makeup Lessons, Party Makeup, Facial Peels, Aromatherapy	050-556-0090	Yes	@lushblush_ahsa
+Royal Beauty Lounge	Hofuf City Center	Henna Designs, Hair Extensions, Bridal Trials, Spa	054-770-1112	Yes	@royalbeauty_hofuf
+Velvet Touch Studio	Al Ahsa Corniche	Laser Hair Removal, Lip Blushing, Semi-Permanent Makeup, Bridal Packages	051-300-4000	Yes	@velvettouchksa
+💄 Famous Beauticians in Al Ahsa, KSA
+Sarah Al Harthy
+
+Specialization: Bridal & Event Makeup
+
+Known for: Instagram Reels, flawless traditional looks
+
+IG: @sarah_alharthy_makeup
+
+Muna Al Dossary
+
+Specialization: Hair Styling & Henna
+
+Known for: Working with influencers & Arab weddings
+
+IG: @munadossary_ahsa
+
+Reem Beauty Artist
+
+Specialization: Semi-Permanent Makeup & Brows
+
+Clinic: Velvet Touch Studio
+
+IG: @reem_beauty
+
+Nourah Al Ajmi
+
+Specialization: Nail Art & Spa Services
+
+Salon: Bloom Lounge
+
+IG: @nourah_ajmi_nails
+
+Fay Al Omran
+
+Specialization: Organic Skin Treatments & Herbal Facials
+
+Known for: Holistic beauty and natural products
+
+IG: @fayorganics_ksa
+

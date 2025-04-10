@@ -43,15 +43,25 @@ export default function HomePage() {
   });
   
   return (
-    <div className="bg-saudi-sand min-h-screen pb-20">
+    <div className="bg-gradient-to-b from-saudi-sand to-white min-h-screen pb-20">
       <LanguageSwitcher />
       <Header />
       
       <main className="container mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-center mb-6">
-        {isArabic ? 'حجز خدمات الصالون' : 'Salon Services Booking'}
-      </h1>
-      {/* Tab Navigation */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-2 text-primary">
+            {isArabic ? "صالونات الأحساء النسائية" : "Al-Ahsa Ladies Salons"}
+          </h1>
+          <p className="text-muted-foreground">
+            {isArabic 
+              ? "اكتشفي أفضل صالونات التجميل النسائية في الأحساء" 
+              : "Discover the finest ladies-only beauty salons in Al-Ahsa"}
+          </p>
+        </div>
+        <h2 className="text-xl font-semibold mb-4 text-center">
+          {isArabic ? 'حجز خدمات الصالون' : 'Salon Services Booking'}
+        </h2>
+        {/* Tab Navigation */}
         <div className="grid grid-cols-2 mb-6 bg-white rounded-xl shadow-sm overflow-hidden">
           <button 
             onClick={() => setActiveTab("female")}
