@@ -58,9 +58,10 @@ export default function HomePage() {
               : "Discover the finest ladies-only beauty salons in Al-Ahsa"}
           </p>
         </div>
-        {isArabic ? 'حجز خدمات الصالون' : 'Salon Services Booking'}
-      </h1>
-      {/* Tab Navigation */}
+        <h2 className="text-xl font-semibold mb-4 text-center">
+          {isArabic ? 'حجز خدمات الصالون' : 'Salon Services Booking'}
+        </h2>
+        {/* Tab Navigation */}
         <div className="grid grid-cols-2 mb-6 bg-white rounded-xl shadow-sm overflow-hidden">
           <button 
             onClick={() => setActiveTab("female")}
