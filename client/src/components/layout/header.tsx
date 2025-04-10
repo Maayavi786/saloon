@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useLanguage } from "@/hooks/use-language";
 import { LanguageSwitcher } from "./language-switcher";
