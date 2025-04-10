@@ -48,7 +48,16 @@ export default function HomePage() {
       <Header />
       
       <main className="container mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold text-center mb-6">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold mb-2 text-primary">
+            {isArabic ? "صالونات الأحساء النسائية" : "Al-Ahsa Ladies Salons"}
+          </h1>
+          <p className="text-muted-foreground">
+            {isArabic 
+              ? "اكتشفي أفضل صالونات التجميل النسائية في الأحساء" 
+              : "Discover the finest ladies-only beauty salons in Al-Ahsa"}
+          </p>
+        </div>
         {isArabic ? 'حجز خدمات الصالون' : 'Salon Services Booking'}
       </h1>
       {/* Tab Navigation */}

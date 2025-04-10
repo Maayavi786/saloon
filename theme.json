@@ -10,8 +10,6 @@
     "mutedForeground": "#64494F",
     "border": "#E8D6DA",
     "input": "#FFFFFF",
-    "ring": "#C48B9F",
-    "saudi-green": "#169873",
-    "saudi-sand": "#FFF5F6"
+    "ring": "#C48B9F"
   }
 }

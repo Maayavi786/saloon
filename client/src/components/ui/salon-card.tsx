@@ -68,7 +68,7 @@ export function SalonCard({ salon, layout = "list", distance }: SalonCardProps) 
   }
 
   return (
-    <div className="bg-white/90 rounded-2xl shadow-lg overflow-hidden mb-4 border border-secondary/20 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm"> {/* This line is modified */}
+    <div className="bg-white/95 rounded-2xl shadow-lg overflow-hidden mb-4 border border-secondary/20 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm hover:shadow-xl"> {/* This line is modified */}
       <Link href={`/salon/${salon.id}`}>
         <div className="flex">
           <div className="relative w-24 h-24">
