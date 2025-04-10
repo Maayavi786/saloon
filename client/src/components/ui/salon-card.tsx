@@ -16,6 +16,16 @@ export function SalonCard({ salon, layout = "list", distance }: SalonCardProps) 
   // Handle missing images with a placeholder
   const coverImage = salon.coverImage || "https://images.unsplash.com/photo-1470259078422-826894b933aa?ixlib=rb-1.2.1&auto=format&fit=crop&w=240&h=240&q=80";
 
+  const formatPrice = (range: string) => {
+    const ranges = {
+      budget: "﷼﷼",
+      mid: "﷼﷼﷼",
+      premium: "﷼﷼﷼﷼",
+      luxury: "﷼﷼﷼﷼﷼"
+    };
+    return ranges[range] || "﷼﷼﷼";
+  };
+
   if (layout === "grid") {
     return (
       <div className="w-64 flex-shrink-0 bg-white rounded-xl shadow-sm overflow-hidden card-hover">
@@ -49,6 +59,9 @@ export function SalonCard({ salon, layout = "list", distance }: SalonCardProps) 
                   {salon.rating?.toFixed(1) || "جديد"}
                 </span>
               </div>
+              <div>
+                {salon.priceRange && <span>Price Range: {formatPrice(salon.priceRange)}</span>}
+              </div>
               <button className="text-primary text-sm">
                 {isArabic ? (
                   <>
@@ -68,7 +81,7 @@ export function SalonCard({ salon, layout = "list", distance }: SalonCardProps) 
   }
 
   return (
-    <div className="bg-white/95 rounded-2xl shadow-lg overflow-hidden mb-4 border border-secondary/20 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm hover:shadow-xl"> {/* This line is modified */}
+    <div className="bg-white/95 rounded-2xl shadow-lg overflow-hidden mb-4 border border-secondary/20 hover:border-primary/30 transition-all duration-300 backdrop-blur-sm hover:shadow-xl">
       <Link href={`/salon/${salon.id}`}>
         <div className="flex">
           <div className="relative w-24 h-24">
@@ -112,6 +125,7 @@ export function SalonCard({ salon, layout = "list", distance }: SalonCardProps) 
                   {isArabic ? "غرف خاصة" : "Private Rooms"}
                 </span>
               )}
+              {salon.priceRange && <span className="ml-2">Price Range: {formatPrice(salon.priceRange)}</span>} {/* Added price range display */}
             </div>
           </div>
         </div>
