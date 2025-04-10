@@ -17,8 +17,8 @@ export function Header() {
   const isArabic = language === "ar";
   
   return (
-    <header className="bg-white shadow-md relative z-10">
-      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+    <header className="bg-white/95 shadow-sm backdrop-blur-sm relative z-10 border-b border-secondary/10">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/" className="flex items-center">
             <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">

@@ -43,7 +43,7 @@ export default function HomePage() {
   });
   
   return (
-    <div className="bg-saudi-sand min-h-screen pb-20">
+    <div className="bg-gradient-to-b from-saudi-sand to-white min-h-screen pb-20">
       <LanguageSwitcher />
       <Header />
       
